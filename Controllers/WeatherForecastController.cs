@@ -23,6 +23,7 @@ namespace WebAppComp3011.Controllers
             //.ToArray();
 
             return ("testing testing 123");
+            // /weatherforecast awon endpoint. gets????
         }
     }
 }
