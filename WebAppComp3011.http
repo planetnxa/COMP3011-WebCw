@@ -1,6 +1,16 @@
-@WebAppComp3011_HostAddress = http://localhost:5051
+@WebAppComp3011_HostAddress = https://localhost:7227
 
 GET {{WebAppComp3011_HostAddress}}/weatherforecast/
 Accept: application/json
+
+###
+
+POST {{WebAppComp3011_HostAddress}}/api/todoitems
+Content-Type: application/json
+
+{
+"Title": "buy new rabbit",
+"IsComplete": true
+}
 
 ###
