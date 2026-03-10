@@ -1,9 +1,14 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using WebAppComp3011.Models;
+using Microsoft.Extensions.DependencyInjection;
+using WebAppComp3011.Data;
 
 
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddDbContext<FragranceContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("FragranceContext") ?? throw new InvalidOperationException("Connection string 'FragranceContext' not found.")));
 
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
@@ -17,6 +22,8 @@ builder.Services.AddDbContext<TodoContext>(opt =>
 https://learn.microsoft.com/en-us/aspnet/core/tutorials/web-api-help-pages-using-swagger?view=aspnetcore-8.0
 https://learn.microsoft.com/en-us/aspnet/core/tutorials/min-web-api?view=aspnetcore-10.0&tabs=visual-studio#test-the-get-endpoints
  https://fragdb.net/ 50 sample, you might have too many in the og db
+
+reference:  https://learn.microsoft.com/en-us/aspnet/core/tutorials/first-mvc-app/working-with-sql?view=aspnetcore-10.0&tabs=visual-studio
 
 allegedly the swagger should only be enabled in development. that's somewhere here
 
