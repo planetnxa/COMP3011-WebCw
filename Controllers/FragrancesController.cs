@@ -33,7 +33,6 @@ namespace WebAppComp3011.Controllers
         public async Task<ActionResult<IEnumerable<Fragrance>>> GetFragrances()
         {
             var list = new List<Fragrance>();
-            
             using (var cn = new SqliteConnection(connectString))
             {
                 await cn.OpenAsync();
