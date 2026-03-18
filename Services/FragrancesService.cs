@@ -40,7 +40,8 @@ namespace WebAppComp3011.Controllers
                 var cmd = cn.CreateCommand();
                 // read from perf100 table (schema provided by user)
                 cmd.CommandText = "SELECT * FROM perf100";
-                using (var reader = await cmd.ExecuteReaderAsync()) {
+                using (var reader = await cmd.ExecuteReaderAsync())
+                {
                     int p = 0;
                     while (await reader.ReadAsync())
                     {
@@ -58,7 +59,7 @@ namespace WebAppComp3011.Controllers
                             Accords = reader["Accords"]?.ToString()?.Split('\'').ToList() ?? new List<string>(),
                             Perfumers = reader["Perfumers"]?.ToString(),
 
-                            Notes = new Notes(){ Top = new List<string>(), Middle = new List<string>(), Base = new List<string>() }
+                            Notes = new Notes() { Top = new List<string>(), Middle = new List<string>(), Base = new List<string>() }
                         };
 
                         // try to populate notes from perfumeNotes table
@@ -71,7 +72,7 @@ namespace WebAppComp3011.Controllers
 
                         list.Add(f);
                     }
-                   // Console.WriteLine(reader);
+                    // Console.WriteLine(reader);
                 } // await for async
                 await cn.CloseAsync();
             }
@@ -79,6 +80,66 @@ namespace WebAppComp3011.Controllers
 
 
         }
+        // GET: api/Fragrances/5
+        [HttpGet("{nigger}")]
+        public async Task<ActionResult<Fragrance>> GetFragrance(int id)
+        {
+            Fragrance frag = null;
+
+            await using (var cn = new SqliteConnection(connectString))
+            {
+                await cn.OpenAsync();
+                var cmd = cn.CreateCommand();
+                // select by perfumeId column from perf100 table
+                cmd.CommandText = "SELECT * FROM perf100 WHERE perfumeId = @id";
+                cmd.Parameters.AddWithValue("@id", id);
+                using (var reader = await cmd.ExecuteReaderAsync())
+                {
+                    if (await reader.ReadAsync())
+                    {
+                        frag = new Fragrance()
+                        {
+                            Id = Convert.ToInt32(reader["perfumeId"]),
+
+
+                            FragUrl = reader["url"]?.ToString(),
+                            FragName = reader["Perfume"]?.ToString(),
+                            Brand = reader["Brand"]?.ToString(),
+                            Country = reader["Country"]?.ToString(),
+                            Gender = reader["Gender"]?.ToString(),
+                            Rating = float.TryParse(reader["Rating"]?.ToString(), out var r) ? r : 0f,
+                            Year = reader["Year"]?.ToString(),
+                            Accords = reader["Accords"]?.ToString()?.Split('\'').ToList() ?? new List<string>(),
+                            Perfumers = reader["Perfumers"]?.ToString(),
+                            Notes = new Notes()
+                            {
+                                Top = new List<string>(),
+                                Middle = new List<string>(),
+                                Base = new List<string>()
+                            }
+                        };
+
+                        if (frag.Id != 0)
+                        {
+                            var notes = await ReadNotes(frag.Id);
+                            if (notes != null)
+                                frag.Notes = notes;
+                        }
+                    }
+                }
+                await cn.CloseAsync();
+            }
+
+            if (frag == null)
+                return NotFound();
+
+            return frag;
+        }
+
+
+
+
+
 
         private async Task<Notes> ReadNotes(int perfumeId)
         {
@@ -123,62 +184,7 @@ namespace WebAppComp3011.Controllers
         }
 
       
-        // GET: api/Fragrances/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Fragrance>> GetFragrance(int id)
-        {
-            Fragrance frag = null;
-
-            await using (var cn = new SqliteConnection(connectString))
-            {
-                await cn.OpenAsync();
-                var cmd = cn.CreateCommand();
-                // select by perfumeId column from perf100 table
-                cmd.CommandText = "SELECT * FROM perf100 WHERE perfumeId = @id";
-                cmd.Parameters.AddWithValue("@id", 24063);
-                using (var reader = await cmd.ExecuteReaderAsync())
-                {
-                    if (await reader.ReadAsync())
-                    {
-                        frag = new Fragrance()
-                        {
-                            Id = Convert.ToInt32(reader["perfumeId"]),
-
-
-                            FragUrl = reader["url"]?.ToString(),
-                            FragName = reader["Perfume"]?.ToString(),
-                            Brand = reader["Brand"]?.ToString(),
-                            Country = reader["Country"]?.ToString(),
-                            Gender = reader["Gender"]?.ToString(),
-                            Rating = float.TryParse(reader["Rating"]?.ToString(), out var r) ? r : 0f,
-                            Year = reader["Year"]?.ToString(),
-                            Accords = reader["Accords"]?.ToString()?.Split('\'').ToList() ?? new List<string>(),
-                            Perfumers = reader["Perfumers"]?.ToString(),
-                            Notes = new Notes()
-                            {
-                                Top = new List<string>(),
-                                Middle = new List<string>(),
-                                Base = new List<string>()
-                            }
-                        };
-
-                        if (frag.Id != 0)
-                        {
-                            var notes = await ReadNotes(frag.Id);
-                            if (notes != null)
-                                frag.Notes = notes;
-                        }
-                    }
-                }
-                await cn.CloseAsync();
-            }
-
-            if (frag == null)
-                return NotFound();
-
-            return frag;
-        }
-
+       
         // PUT: api/Fragrance/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
