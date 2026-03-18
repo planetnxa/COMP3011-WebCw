@@ -30,7 +30,6 @@ namespace WebAppComp3011.Controllers
 
 
         // GET: api/Fragrances
-
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Fragrance>>> GetFragrances()
         {
@@ -40,9 +39,7 @@ namespace WebAppComp3011.Controllers
                 await cn.OpenAsync();
                 var cmd = cn.CreateCommand();
                 // read from perf100 table (schema provided by user)
-
-                cmd.CommandText = "SELECT * FROM perfumeData";
-
+                cmd.CommandText = "SELECT * FROM perf100";
                 using (var reader = await cmd.ExecuteReaderAsync()) {
                     int p = 0;
                     while (await reader.ReadAsync())
