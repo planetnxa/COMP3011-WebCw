@@ -15,7 +15,7 @@ using Newtonsoft.Json;
 
 namespace WebAppComp3011.Controllers
 {
-
+    // https://cwdeploy01.azurewebsites.net/api/fragrances site now available
 
     [Route("api/[controller]")]
     [ApiController]
@@ -33,185 +33,255 @@ namespace WebAppComp3011.Controllers
         public async Task<ActionResult<IEnumerable<Fragrance>>> GetFragrances()
         {
             var list = new List<Fragrance>();
-
-            await using (var conn = new SqliteConnection(connectString))
+            using (var cn = new SqliteConnection(connectString))
             {
-                await conn.OpenAsync();
-                await using var cmd = conn.CreateCommand();
-                cmd.CommandText = "SELECT * FROM perfume100";
-                await using var reader = await cmd.ExecuteReaderAsync();
-                list = JsonConvert.DeserializeObject<List<Fragrance>>(JsonConvert.SerializeObject(reader));
+                await cn.OpenAsync();
+                var cmd = cn.CreateCommand();
+                // include sqlite internal rowid so we can use it as the Fragrance.Id
+                cmd.CommandText = "SELECT rowid, * FROM perfume100"; // made smaller db table for testing
+                using (var reader = await cmd.ExecuteReaderAsync()) {
+                    int p = 0;
+                    while (await reader.ReadAsync())
+                    {
+                        Console.WriteLine(reader["Perfume"].ToString());
+                        p += 1;
+                        Fragrance f = new Fragrance() {
+                            Id = Convert.ToInt32(reader["rowid"]),
+                            FragUrl = reader["url"].ToString(),
+                            FragName = reader["Perfume"].ToString(),
+                            Brand = reader["Brand"].ToString(),
+                            Country = reader["Country"].ToString(),
+                            Gender = reader["Gender"].ToString(),
+                            RatingValue = float.Parse(reader["Rating Value"].ToString()), // fi fix with db in cw01
+                            RatingCount = Convert.ToInt32(reader["Rating Count"]),
+                            Year = reader["year"].ToString(),
+                            Notes = new Notes() { Base = reader["Base"].ToString(),
+                                Middle = reader["Middle"].ToString(),
+                                Top = reader["Top"].ToString() },
+                            Perfumer1 = reader["Perfumer1"].ToString(),
+                            Perfumer2 = reader["Perfumer2"].ToString(),
+                            MainAccords = new List<string> {reader["mainaccord1"].ToString(), reader["mainaccord2"].ToString() , reader["mainaccord3"].ToString() , reader["mainaccord4"].ToString() , reader["mainaccord5"].ToString() },
+                        };
+
+                        list.Add(f);                   
+                    }
+                   // Console.WriteLine(reader);
+                } // await for async
+                await cn.CloseAsync();
+            }
+            return list;
+
+
+        }
+        
+        // GET: api/Fragrances/5
+        [HttpGet("{id}")]
+        public async Task<ActionResult<Fragrance>> GetFragrance(int id)
+        {
+            Fragrance frag = null;
+
+            await using (var cn = new SqliteConnection(connectString))
+            {
+                await cn.OpenAsync();
+                var cmd = cn.CreateCommand();
+                // use sqlite internal rowid as identifier for scaffolding
+                cmd.CommandText = "SELECT rowid, * FROM perfume100 WHERE rowid = @id LIMIT 1";
+                cmd.Parameters.AddWithValue("@id", id);
+                using (var reader = await cmd.ExecuteReaderAsync())
+                {
+                    if (await reader.ReadAsync())
+                    {
+                        frag = new Fragrance()
+                        {
+                            Id = Convert.ToInt32(reader["rowid"]),
+                            FragUrl = reader["url"].ToString(),
+                            FragName = reader["Perfume"].ToString(),
+                            Brand = reader["Brand"].ToString(),
+                            Country = reader["Country"].ToString(),
+                            Gender = reader["Gender"].ToString(),
+                            RatingValue = float.TryParse(reader["Rating Value"].ToString(), out var rv) ? rv : 0f,
+                            RatingCount = int.TryParse(reader["Rating Count"].ToString(), out var rc) ? rc : 0,
+                            Year = reader["year"].ToString(),
+                            Notes = new Notes()
+                            {
+                                Base = reader["Base"].ToString(),
+                                Middle = reader["Middle"].ToString(),
+                                Top = reader["Top"].ToString()
+                            },
+                            Perfumer1 = reader["Perfumer1"].ToString(),
+                            Perfumer2 = reader["Perfumer2"].ToString(),
+                            MainAccords = new List<string>
+                            {
+                                reader["mainaccord1"].ToString(),
+                                reader["mainaccord2"].ToString(),
+                                reader["mainaccord3"].ToString(),
+                                reader["mainaccord4"].ToString(),
+                                reader["mainaccord5"].ToString()
+                            }
+                        };
+                    }
+                }
+                await cn.CloseAsync();
             }
 
-            Console.WriteLine(list.Count);
-            return list;
-            
+            if (frag == null)
+                return NotFound();
+
+            return frag;
         }
-      /*  {
-        //// GET: api/Fragrances/5
-        //[HttpGet("{id}")]
-        //public async Task<ActionResult<Fragrance>> GetFragrance(int id)
-        //{
-        //    Fragrance frag = null;
 
-        //    await using (var conn = new SqlConnection(connectString))
-        //    {
-        //        await conn.OpenAsync();
-        //        await using var cmd = conn.CreateCommand();
-        //        cmd.CommandText = "SELECT * FROM Fragrance WHERE Id = @id";
-        //        cmd.Parameters.Add(new SqlParameter("@id", SqlDbType.Int) { Value = id });
-        //        await using var reader = await cmd.ExecuteReaderAsync();
-        //        if (await reader.ReadAsync())
-        //        {
-        //            frag = ReadFragranceFromReader(reader);
-        //        }
-        //    }
+        // PUT: api/Fragrance/5
+        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutFrag(int id, Fragrance frag)
+        {
+            if (id != frag.Id)
+                return BadRequest();
 
-        //    if (frag == null)
-        //        return NotFound();
+            int rowsAffected = 0;
+            await using (var cn = new SqliteConnection(connectString))
+            {
+                await cn.OpenAsync();
+                var cmd = cn.CreateCommand();
+                cmd.CommandText = @"UPDATE perfume100 SET
+                    url = @FragUrl,
+                    Perfume = @FragName,
+                    Brand = @Brand,
+                    Country = @Country,
+                    Gender = @Gender,
+                    ""Rating Value"" = @RatingValue,
+                    ""Rating Count"" = @RatingCount,
+                    year = @Year,
+                    Top = @Top,
+                    Middle = @Middle,
+                    Base = @Base,
+                    Perfumer1 = @Perfumer1,
+                    Perfumer2 = @Perfumer2,
+                    mainaccord1 = @ma1,
+                    mainaccord2 = @ma2,
+                    mainaccord3 = @ma3,
+                    mainaccord4 = @ma4,
+                    mainaccord5 = @ma5
+                    WHERE rowid = @Id";
 
-        //    return frag;
-        //}
+                cmd.Parameters.AddWithValue("@FragUrl", frag.FragUrl ?? string.Empty);
+                cmd.Parameters.AddWithValue("@FragName", frag.FragName ?? string.Empty);
+                cmd.Parameters.AddWithValue("@Brand", frag.Brand ?? string.Empty);
+                cmd.Parameters.AddWithValue("@Country", frag.Country ?? string.Empty);
+                cmd.Parameters.AddWithValue("@Gender", frag.Gender ?? string.Empty);
+                cmd.Parameters.AddWithValue("@RatingValue", frag.RatingValue);
+                cmd.Parameters.AddWithValue("@RatingCount", frag.RatingCount);
+                cmd.Parameters.AddWithValue("@Year", frag.Year ?? string.Empty);
+                cmd.Parameters.AddWithValue("@Top", frag.Notes?.Top ?? string.Empty);
+                cmd.Parameters.AddWithValue("@Middle", frag.Notes?.Middle ?? string.Empty);
+                cmd.Parameters.AddWithValue("@Base", frag.Notes?.Base ?? string.Empty);
+                cmd.Parameters.AddWithValue("@Perfumer1", frag.Perfumer1 ?? string.Empty);
+                cmd.Parameters.AddWithValue("@Perfumer2", frag.Perfumer2 ?? string.Empty);
+                var ma = frag.MainAccords ?? new List<string>();
+                cmd.Parameters.AddWithValue("@ma1", ma.ElementAtOrDefault(0) ?? string.Empty);
+                cmd.Parameters.AddWithValue("@ma2", ma.ElementAtOrDefault(1) ?? string.Empty);
+                cmd.Parameters.AddWithValue("@ma3", ma.ElementAtOrDefault(2) ?? string.Empty);
+                cmd.Parameters.AddWithValue("@ma4", ma.ElementAtOrDefault(3) ?? string.Empty);
+                cmd.Parameters.AddWithValue("@ma5", ma.ElementAtOrDefault(4) ?? string.Empty);
+                cmd.Parameters.AddWithValue("@Id", id);
 
-        //// PUT: api/Fragrance/5
-        //// To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        //[HttpPut("{id}")]
-        //public async Task<IActionResult> PutFrag(int id, Fragrance frag)
-        //{
-        //    if (id != frag.Id)
-        //        return BadRequest();
+                rowsAffected = await cmd.ExecuteNonQueryAsync();
+                await cn.CloseAsync();
+            }
 
-        //    // Build UPDATE statement dynamically based on model properties (excluding Id)
-        //    var props = typeof(Fragrance).GetProperties(BindingFlags.Public | BindingFlags.Instance)
-        //        .Where(p => !string.Equals(p.Name, "Id", StringComparison.OrdinalIgnoreCase)).ToArray();
+            if (rowsAffected == 0)
+            {
+                if (!FragranceExists(id))
+                    return NotFound();
+            }
 
-        //    var setClauses = props.Select(p => $"[{p.Name}] = @{p.Name}");
-        //    var sql = $"UPDATE Fragrance SET {string.Join(", ", setClauses)} WHERE Id = @Id";
+            return NoContent();
+        }
 
-        //    int rowsAffected;
-        //    await using (var conn = new SqlConnection(connectString))
-        //    {
-        //        await conn.OpenAsync();
-        //        await using var cmd = conn.CreateCommand();
-        //        cmd.CommandText = sql;
-        //        foreach (var p in props)
-        //        {
-        //            var val = p.GetValue(frag) ?? DBNull.Value;
-        //            cmd.Parameters.AddWithValue("@" + p.Name, val);
-        //        }
-        //        cmd.Parameters.AddWithValue("@Id", frag.Id);
-        //        rowsAffected = await cmd.ExecuteNonQueryAsync();
-        //    }
+        // POST: api/Fragrances
+        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [HttpPost]
+        public async Task<ActionResult<Fragrance>> PostFragrance(Fragrance fragrance)
+        {
+            int newId = 0;
+            await using (var cn = new SqliteConnection(connectString))
+            {
+                await cn.OpenAsync();
+                var cmd = cn.CreateCommand();
+                cmd.CommandText = @"INSERT INTO perfume100 (
+                    url, Perfume, Brand, Country, Gender, ""Rating Value"", ""Rating Count"", year,
+                    Top, Middle, Base, Perfumer1, Perfumer2, mainaccord1, mainaccord2, mainaccord3, mainaccord4, mainaccord5
+                    ) VALUES (
+                    @FragUrl, @FragName, @Brand, @Country, @Gender, @RatingValue, @RatingCount, @Year,
+                    @Top, @Middle, @Base, @Perfumer1, @Perfumer2, @ma1, @ma2, @ma3, @ma4, @ma5
+                    ); SELECT last_insert_rowid();";
 
-        //    if (rowsAffected == 0)
-        //    {
-        //        if (!FragranceExists(id))
-        //            return NotFound();
-        //    }
+                cmd.Parameters.AddWithValue("@FragUrl", fragrance.FragUrl ?? string.Empty);
+                cmd.Parameters.AddWithValue("@FragName", fragrance.FragName ?? string.Empty);
+                cmd.Parameters.AddWithValue("@Brand", fragrance.Brand ?? string.Empty);
+                cmd.Parameters.AddWithValue("@Country", fragrance.Country ?? string.Empty);
+                cmd.Parameters.AddWithValue("@Gender", fragrance.Gender ?? string.Empty);
+                cmd.Parameters.AddWithValue("@RatingValue", fragrance.RatingValue);
+                cmd.Parameters.AddWithValue("@RatingCount", fragrance.RatingCount);
+                cmd.Parameters.AddWithValue("@Year", fragrance.Year ?? string.Empty);
+                cmd.Parameters.AddWithValue("@Top", fragrance.Notes?.Top ?? string.Empty);
+                cmd.Parameters.AddWithValue("@Middle", fragrance.Notes?.Middle ?? string.Empty);
+                cmd.Parameters.AddWithValue("@Base", fragrance.Notes?.Base ?? string.Empty);
+                cmd.Parameters.AddWithValue("@Perfumer1", fragrance.Perfumer1 ?? string.Empty);
+                cmd.Parameters.AddWithValue("@Perfumer2", fragrance.Perfumer2 ?? string.Empty);
+                var ma = fragrance.MainAccords ?? new List<string>();
+                cmd.Parameters.AddWithValue("@ma1", ma.ElementAtOrDefault(0) ?? string.Empty);
+                cmd.Parameters.AddWithValue("@ma2", ma.ElementAtOrDefault(1) ?? string.Empty);
+                cmd.Parameters.AddWithValue("@ma3", ma.ElementAtOrDefault(2) ?? string.Empty);
+                cmd.Parameters.AddWithValue("@ma4", ma.ElementAtOrDefault(3) ?? string.Empty);
+                cmd.Parameters.AddWithValue("@ma5", ma.ElementAtOrDefault(4) ?? string.Empty);
 
-        //    return NoContent();
-        //}
+                var result = await cmd.ExecuteScalarAsync();
+                newId = Convert.ToInt32(result);
+                await cn.CloseAsync();
+            }
 
-        //// POST: api/Fragrances
-        //// To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        //[HttpPost]
-        //public async Task<ActionResult<Fragrance>> PostFragrance(Fragrance fragrance)
-        //{
-        //    // Insert all properties except Id and return the generated Id
-        //    var props = typeof(Fragrance).GetProperties(BindingFlags.Public | BindingFlags.Instance)
-        //        .Where(p => !string.Equals(p.Name, "Id", StringComparison.OrdinalIgnoreCase)).ToArray();
+            fragrance.Id = newId;
+            return CreatedAtAction(nameof(GetFragrance), new { id = fragrance.Id }, fragrance);
+        }
 
-        //    var columns = props.Select(p => $"[{p.Name}]").ToArray();
-        //    var parameters = props.Select(p => "@" + p.Name).ToArray();
+        // DELETE: api/Fragrances/5
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteFragrance(int id)
+        {
+            int rowsAffected = 0;
+            await using (var cn = new SqliteConnection(connectString))
+            {
+                await cn.OpenAsync();
+                var cmd = cn.CreateCommand();
+                cmd.CommandText = "DELETE FROM perfume100 WHERE rowid = @id";
+                cmd.Parameters.AddWithValue("@id", id);
+                rowsAffected = await cmd.ExecuteNonQueryAsync();
+                await cn.CloseAsync();
+            }
 
-        //    var sql = $"INSERT INTO Fragrance ({string.Join(", ", columns)}) OUTPUT INSERTED.Id VALUES ({string.Join(", ", parameters)})";
+            if (rowsAffected == 0)
+                return NotFound();
 
-        //    int newId;
-        //    await using (var conn = new SqlConnection(connectString))
-        //    {
-        //        await conn.OpenAsync();
-        //        await using var cmd = conn.CreateCommand();
-        //        cmd.CommandText = sql;
-        //        foreach (var p in props)
-        //        {
-        //            var val = p.GetValue(fragrance) ?? DBNull.Value;
-        //            cmd.Parameters.AddWithValue("@" + p.Name, val);
-        //        }
-        //        var result = await cmd.ExecuteScalarAsync();
-        //        newId = Convert.ToInt32(result);
-        //    }
+            return NoContent();
+        }
 
-        //    fragrance.Id = newId;
-        //    return CreatedAtAction(nameof(GetFragrance), new { id = fragrance.Id }, fragrance);
-        //}
+        private bool FragranceExists(int id)
+        {
+            var exists = false;
+            using (var cn = new SqliteConnection(connectString))
+            {
+                cn.Open();
+                using var cmd = cn.CreateCommand();
+                cmd.CommandText = "SELECT 1 FROM perfume100 WHERE rowid = @id LIMIT 1";
+                cmd.Parameters.AddWithValue("@id", id);
+                var result = cmd.ExecuteScalar();
+                exists = result != null;
+            }
 
-        //// DELETE: api/Fragrances/5
-        //[HttpDelete("{id}")]
-        //public async Task<IActionResult> DeleteFragrance(int id)
-        //{
-        //    int rowsAffected;
-        //    await using (var conn = new SqlConnection(connectString))
-        //    {
-        //        await conn.OpenAsync();
-        //        await using var cmd = conn.CreateCommand();
-        //        cmd.CommandText = "DELETE FROM Fragrance WHERE Id = @id";
-        //        cmd.Parameters.AddWithValue("@id", id);
-        //        rowsAffected = await cmd.ExecuteNonQueryAsync();
-        //    }
-
-        //    if (rowsAffected == 0)
-        //        return NotFound();
-
-        //    return NoContent();
-        //}
-
-        //private bool FragranceExists(int id)
-        //{
-        //    var exists = false;
-        //    using (var conn = new SqlConnection(connectString))
-        //    {
-        //        conn.Open();
-        //        using var cmd = conn.CreateCommand();
-        //        cmd.CommandText = "SELECT COUNT(1) FROM Fragrance WHERE Id = @id";
-        //        cmd.Parameters.AddWithValue("@id", id);
-        //        var result = cmd.ExecuteScalar();
-        //        exists = Convert.ToInt32(result) > 0;
-        //    }
-
-        //    return exists;
-        //}
-
-        //private Fragrance ReadFragranceFromReader(SqlDataReader reader)
-        //{
-        //    var frag = new Fragrance();
-        //    var props = typeof(Fragrance).GetProperties(BindingFlags.Public | BindingFlags.Instance);
-        //    for (int i = 0; i < reader.FieldCount; i++)
-        //    {
-        //        var name = reader.GetName(i);
-        //        var prop = props.FirstOrDefault(p => string.Equals(p.Name, name, StringComparison.OrdinalIgnoreCase));
-        //        if (prop == null) continue;
-        //        var val = reader.IsDBNull(i) ? null : reader.GetValue(i);
-        //        try
-        //        {
-        //            if (val == null)
-        //            {
-        //                prop.SetValue(frag, null);
-        //            }
-        //            else
-        //            {
-        //                var targetType = Nullable.GetUnderlyingType(prop.PropertyType) ?? prop.PropertyType;
-        //                prop.SetValue(frag, Convert.ChangeType(val, targetType));
-        //            }
-        //        }
-        //        catch
-        //        {
-        //            // ignore conversion errors for unsupported types
-        //        }
-        //    }
-
-        //    return frag;
-        //}
-        } */
+            return exists;
+        }
     }
-
 }
+
+
