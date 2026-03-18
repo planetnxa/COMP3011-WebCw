@@ -12,8 +12,7 @@ builder.Services.AddDbContext<FragranceContext>(options =>
 
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
-builder.Services.AddDbContext<TodoContext>(opt =>
-    opt.UseInMemoryDatabase("TodoList"));
+
 
 // something something dependency injections
 /* data to read

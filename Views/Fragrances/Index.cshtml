@@ -28,10 +28,10 @@
                 @Html.DisplayNameFor(model => model.Gender)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.RatingValue)
+                @Html.DisplayNameFor(model => model.Rating)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.RatingCount)
+                @Html.DisplayNameFor(model => model.Accords)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.Year)
@@ -46,13 +46,7 @@
                 @Html.DisplayNameFor(model => model.Notes.Base)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Perfumer1)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Perfumer2)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.MainAccords)
+                @Html.DisplayNameFor(model => model.Perfumers)
             </th>
             <th></th>
         </tr>
@@ -76,10 +70,10 @@
                 @Html.DisplayFor(modelItem => item.Gender)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.RatingValue)
+                @Html.DisplayFor(modelItem => item.Rating)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.RatingCount)
+                @Html.DisplayFor(modelItem => item.Accords)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Year)
@@ -94,13 +88,7 @@
                 @Html.DisplayFor(modelItem => item.Notes.Base)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Perfumer1)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Perfumer2)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.MainAccords)
+                @Html.DisplayFor(modelItem => item.Perfumers)
             </td>
             <td>
                 <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
