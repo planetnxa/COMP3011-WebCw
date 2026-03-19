@@ -3,6 +3,9 @@ using Microsoft.Extensions.Options;
 using WebAppComp3011.Models;
 using Microsoft.Extensions.DependencyInjection;
 using WebAppComp3011.Data;
+using WebAppComp3011.Services;
+using Microsoft.OpenApi;
+using System.Reflection;
 
 
 
@@ -13,20 +16,42 @@ builder.Services.AddDbContext<FragranceContext>(options =>
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
+// Register services for dependency injection
+builder.Services.AddScoped<UserProfileService>();
+
+// Register HttpClient with base address for API calls
+string baseAddress = builder.Configuration["ApiBaseAddress"] ?? "http://localhost:5000";
+builder.Services.AddHttpClient("ApiClient", client =>
+{
+    client.BaseAddress = new Uri(baseAddress);
+    client.Timeout = TimeSpan.FromSeconds(10);
+});
+
+// Add session support
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
+
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Version = "v1",
+        Title = "D'Arome API",
+        Description = "An ASP.NET Core Web API for managing fragrances and user profiles."
+    });
+
+    // to add context to our web api
+    var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    c.IncludeXmlComments(xmlPath);
+} );
 
 // something something dependency injections
-/* data to read
 
- https://blog.intertoons.com/simplified-guide-to-documenting-asp-net-web-api-with-swagger-f4c40731f90c
-https://learn.microsoft.com/en-us/aspnet/core/tutorials/web-api-help-pages-using-swagger?view=aspnetcore-8.0
-https://learn.microsoft.com/en-us/aspnet/core/tutorials/min-web-api?view=aspnetcore-10.0&tabs=visual-studio#test-the-get-endpoints
- https://fragdb.net/ 50 sample, you might have too many in the og db
-
-reference:  https://learn.microsoft.com/en-us/aspnet/core/tutorials/first-mvc-app/working-with-sql?view=aspnetcore-10.0&tabs=visual-studio
-
-allegedly the swagger should only be enabled in development. that's somewhere here
-
- */
 // Add services to the container.
 
 builder.Services.AddControllers();
@@ -42,11 +67,13 @@ if (app.Environment.IsDevelopment())
     //and use swashbuckly nd ting
     app.UseSwaggerUI(options =>
     {
-        options.SwaggerEndpoint("/openapi/v1.json", "v1");
+        options.SwaggerEndpoint("/openapi/v1.json", "D'Arome API v1");
     }); // baby what does this do????
 }
 
 app.UseHttpsRedirection();
+
+app.UseSession();
 
 app.UseAuthorization();
 
