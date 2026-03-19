@@ -20,7 +20,7 @@ namespace WebAppComp3011.Controllers
 
     [Route("api/[controller]")]
     [ApiController]
-    public class FragrancesService : ControllerBase
+    public class FragrancesController : ControllerBase
     {
 
         // Updated connection string to use LocalDB SQL Server instance. Adjust as needed for your environment.
@@ -80,66 +80,94 @@ namespace WebAppComp3011.Controllers
 
 
         }
-        // GET: api/Fragrances/5
-        [HttpGet("{nigger}")]
-        public async Task<ActionResult<Fragrance>> GetFragrance(int id)
+
+        // Helper function
+        private async Task<List<Fragrance>> GetFragrance(string sql, Dictionary<string, object> parameters)
         {
-            Fragrance frag = null;
+            var results = new List<Fragrance>();
 
-            await using (var cn = new SqliteConnection(connectString))
+            await using var cn = new SqliteConnection(connectString);
+            await cn.OpenAsync();
+            var cmd = cn.CreateCommand();
+            cmd.CommandText = sql;
+
+            // Add parameters safely
+            if (parameters != null)
             {
-                await cn.OpenAsync();
-                var cmd = cn.CreateCommand();
-                // select by perfumeId column from perf100 table
-                cmd.CommandText = "SELECT * FROM perf100 WHERE perfumeId = @id";
-                cmd.Parameters.AddWithValue("@id", id);
-                using (var reader = await cmd.ExecuteReaderAsync())
+                foreach (var kv in parameters)
                 {
-                    if (await reader.ReadAsync())
-                    {
-                        frag = new Fragrance()
-                        {
-                            Id = Convert.ToInt32(reader["perfumeId"]),
-
-
-                            FragUrl = reader["url"]?.ToString(),
-                            FragName = reader["Perfume"]?.ToString(),
-                            Brand = reader["Brand"]?.ToString(),
-                            Country = reader["Country"]?.ToString(),
-                            Gender = reader["Gender"]?.ToString(),
-                            Rating = float.TryParse(reader["Rating"]?.ToString(), out var r) ? r : 0f,
-                            Year = reader["Year"]?.ToString(),
-                            Accords = reader["Accords"]?.ToString()?.Split('\'').ToList() ?? new List<string>(),
-                            Perfumers = reader["Perfumers"]?.ToString(),
-                            Notes = new Notes()
-                            {
-                                Top = new List<string>(),
-                                Middle = new List<string>(),
-                                Base = new List<string>()
-                            }
-                        };
-
-                        if (frag.Id != 0)
-                        {
-                            var notes = await ReadNotes(frag.Id);
-                            if (notes != null)
-                                frag.Notes = notes;
-                        }
-                    }
+                    cmd.Parameters.AddWithValue(kv.Key, kv.Value);
                 }
-                await cn.CloseAsync();
             }
 
-            if (frag == null)
-                return NotFound();
+            using var reader = await cmd.ExecuteReaderAsync();
+            while (await reader.ReadAsync())
+            {
+                var frag = new Fragrance
+                {
+                    Id = Convert.ToInt32(reader["perfumeId"]),
+                    FragUrl = reader["url"]?.ToString(),
+                    FragName = reader["Perfume"]?.ToString(),
+                    Brand = reader["Brand"]?.ToString(),
+                    Country = reader["Country"]?.ToString(),
+                    Gender = reader["Gender"]?.ToString(),
+                    Rating = float.TryParse(reader["Rating"]?.ToString(), out var r) ? r : 0f,
+                    Year = reader["Year"]?.ToString(),
+                    Accords = reader["Accords"]?.ToString()?.Split(',').ToList() ?? new List<string>(),
+                    Perfumers = reader["Perfumers"]?.ToString(),
+                    Notes = await ReadNotes(Convert.ToInt32(reader["perfumeId"]))
+                };
 
-            return frag;
+                results.Add(frag);
+            }
+
+            return results;
         }
 
+        // Get all perfumes
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<Fragrance>>> GetAllFragrances()
+        {
+            var sql = "SELECT * FROM perf100";
+            var results = await GetFragrance(sql, null);
+            return results.Count == 0 ? NotFound() : results;
+        }
 
+        // Get by brand
+        [HttpGet("brand/{brandName}")]
+        public async Task<ActionResult<IEnumerable<Fragrance>>> GetByBrand(string brandName)
+        {
+            var sql = "SELECT * FROM perf100 WHERE Brand LIKE @brand";
+            var parameters = new Dictionary<string, object> { { "@brand", $"%{brandName}%" } };
+            var results = await GetFragrance(sql, parameters);
+            return results.Count == 0 ? NotFound() : results;
+        }
 
+        // Get by accord
+        [HttpGet("accord/{accord}")]
+        public async Task<ActionResult<IEnumerable<Fragrance>>> GetByAccord(string accord)
+        {
+            var sql = "SELECT * FROM perf100 WHERE Accords LIKE @accord";
+            var parameters = new Dictionary<string, object> { { "@accord", $"%{accord}%" } };
+            var results = await GetFragrance(sql, parameters);
+            return results.Count == 0 ? NotFound() : results;
+        }
 
-
+        // Get by notes (any top/middle/base)
+        [HttpGet("note/{note}")]
+        public async Task<ActionResult<IEnumerable<Fragrance>>> GetByNote(string note)
+        {
+            // Join PerfumeNotes to filter by note
+            var sql = @"
+        SELECT p.* 
+        FROM perf100 p
+        JOIN PerfumeNotes n ON p.perfumeId = n.PerfumeId
+        WHERE n.Note LIKE @note
+    ";
+            var parameters = new Dictionary<string, object> { { "@note", $"%{note}%" } };
+            var results = await GetFragrance(sql, parameters);
+            return results.Count == 0 ? NotFound() : results;
+        }
 
         private async Task<Notes> ReadNotes(int perfumeId)
         {
