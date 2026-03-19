@@ -46,7 +46,7 @@ namespace WebAppComp3011.Controllers
         }
 
         // GET: api/UserCabinet/5
-        [HttpGet("{id}")]
+        [HttpGet("{id:int}")]
         public async Task<ActionResult<UserCabinet>> GetUserCabinetById([FromRoute] int id)
         {
             UserCabinet entry = null;

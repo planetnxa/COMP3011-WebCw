@@ -45,7 +45,7 @@ namespace WebAppComp3011.Controllers
         }
 
         // GET: api/UserProfile/5
-        [HttpGet("{id}")]
+        [HttpGet("{id:int}")]
         public async Task<ActionResult<UserProfile>> GetUserProfileById([FromRoute] int id)
         {
             UserProfile profile = null;
@@ -142,7 +142,7 @@ namespace WebAppComp3011.Controllers
         }
 
         // PUT: api/UserProfile/5
-        [HttpPut("{id}")]
+        [HttpPut("{id:int}")]
         public async Task<IActionResult> PutUserProfile([FromRoute] int id, [FromBody] UserProfile profile)
         {
             if (id != profile.Id)
@@ -180,7 +180,7 @@ namespace WebAppComp3011.Controllers
         }
 
         // DELETE: api/UserProfile/5
-        [HttpDelete("{id}")]
+        [HttpDelete("{id:int}")]
         public async Task<IActionResult> DeleteUserProfile([FromRoute] int id)
         {
             int rowsAffected = 0;
