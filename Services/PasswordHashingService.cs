@@ -13,14 +13,6 @@ namespace WebAppComp3011.Services
             if (string.IsNullOrWhiteSpace(password))
                 return string.Empty;
 
-            // If in development mode and username is abc, def, or xyz, skip hashing
-            if (isDevelopment && username != null)
-            {
-                var devUsers = new[] { "abc", "def", "xyz" };
-                if (devUsers.Contains(username.ToLowerInvariant()))
-                    return password;
-            }
-
             // Generate a random salt (16 bytes)
             byte[] salt = new byte[16];
             using (var rng = RandomNumberGenerator.Create())

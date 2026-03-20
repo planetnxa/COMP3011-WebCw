@@ -1,0 +1,147 @@
+@page
+@model WebAppComp3011.Pages.FragrancesModel
+@{
+    ViewData["Title"] = "Find Fragrances";
+}
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <h1>Find Fragrances</h1>
+            <p class="lead">Search for fragrances by name, brand, accord, or notes and add them to your cabinet.</p>
+
+            <!-- Search Section -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Search for Fragrances</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="row g-2 mb-3">
+                            <div class="col-md-6">
+                                <label for="SearchQuery" class="form-label">Search Query</label>
+                                <input type="text" class="form-control" id="SearchQuery" placeholder="Enter fragrance name, brand, etc." required>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="SearchType" class="form-label">Search By</label>
+                                <select class="form-select" id="SearchType">
+                                    <option value="name">Name</option>
+                                    <option value="brand">Brand</option>
+                                    <option value="accord">Accord</option>
+                                    <option value="notes">Notes</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2 d-flex align-items-end">
+                                <button type="button" id="SearchButton" class="btn btn-primary w-100">Search</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="SearchResultsContainer"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .btn-primary {
+        background-color: #6f42c1;
+        border-color: #6f42c1;
+    }
+    .btn-primary:hover {
+        background-color: #5a32a3;
+    }
+</style>
+
+@section Scripts {
+    <script>
+        function getAntiForgeryToken() {
+            return document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+        }
+
+        document.getElementById('SearchButton').addEventListener('click', async function() {
+            const searchQuery = document.getElementById('SearchQuery').value.trim();
+            const searchType = document.getElementById('SearchType').value;
+            const resultsContainer = document.getElementById('SearchResultsContainer');
+            const token = getAntiForgeryToken();
+
+            if (!searchQuery) {
+                resultsContainer.innerHTML = '<div class="alert alert-warning">Please enter a search query.</div>';
+                return;
+            }
+
+            try {
+                const response = await fetch(`/Fragrances?handler=Search`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': token
+                    },
+                    body: JSON.stringify({
+                        searchQuery: searchQuery,
+                        searchType: searchType
+                    })
+                });
+
+                if (!response.ok) {
+                    resultsContainer.innerHTML = `<div class="alert alert-danger">Search failed with status ${response.status}.</div>`;
+                    return;
+                }
+
+                const fragrances = await response.json();
+
+                if (fragrances.length === 0) {
+                    resultsContainer.innerHTML = '<div class="alert alert-info">No fragrances found matching your search. Try a different query or search type.</div>';
+                    return;
+                }
+
+                let html = `<div class="search-results mt-4"><h5>Search Results (${fragrances.length})</h5><div class="row">`;
+
+                fragrances.forEach(fragrance => {
+                    const rating = fragrance.rating > 0 ? `<br><strong>Rating:</strong> ${fragrance.rating.toFixed(1)} / 10` : '';
+                    html += `
+                        <div class="col-md-6 mb-3">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h6 class="card-title">${fragrance.fragName}</h6>
+                                    <p class="card-text">
+                                        <small>
+                                            <strong>Brand:</strong> ${fragrance.brand}<br>
+                                            <strong>Gender:</strong> ${fragrance.gender}<br>
+                                            <strong>Year:</strong> ${fragrance.year}${rating}
+                                        </small>
+                                    </p>
+                                </div>
+                                <div class="card-footer bg-light">
+                                    <form method="post" action="/Fragrances?handler=AddToCabinet" style="display:inline;">
+                                        <input type="hidden" name="__RequestVerificationToken" value="${token}">
+                                        <input type="hidden" name="fragranceId" value="${fragrance.id}">
+                                        <button type="submit" class="btn btn-sm btn-success w-100">
+                                            <i class="bi bi-plus-circle"></i> Add to Cabinet
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                html += `</div></div>`;
+                resultsContainer.innerHTML = html;
+            } catch (error) {
+                resultsContainer.innerHTML = `<div class="alert alert-danger">An error occurred: ${error.message}</div>`;
+                console.error('Search error:', error);
+            }
+        });
+
+        document.getElementById('SearchQuery').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                document.getElementById('SearchButton').click();
+            }
+        });
+    </script>
+}

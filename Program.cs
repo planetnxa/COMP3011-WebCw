@@ -13,8 +13,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<FragranceContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("FragranceContext") ?? throw new InvalidOperationException("Connection string 'FragranceContext' not found.")));
 
-// Use AddControllersWithViews — NOT AddControllers
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
 // Enable Razor Pages for frontend views
@@ -72,8 +71,7 @@ app.UseSession();
 
 app.UseAuthorization();
 
-app.MapControllerRoute(name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+app.MapControllers();
 
 app.MapRazorPages();
 

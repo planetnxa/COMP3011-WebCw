@@ -45,4 +45,10 @@
     </PackageReference>
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Controllers\" />
+    <Folder Include="Pages\Fragrances\" />
+    <Folder Include="Views\Home\" />
+  </ItemGroup>
+
 </Project>

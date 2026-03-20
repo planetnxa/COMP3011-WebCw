@@ -1,0 +1,77 @@
+@page
+@model WebAppComp3011.Pages.IndexModel
+@{
+    ViewData["Title"] = "Home";
+}
+
+@if (Model.IsLoggedIn)
+{
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8 text-center">
+                <h1>Welcome back, @Model.Username</h1>
+                <p class="lead text-muted">What would you like to do today?</p>
+                <hr />
+                <div class="row mt-4">
+                    <div class="col-md-4 mb-3">
+                        <div class="card h-100">
+                            <div class="card-body text-center">
+                                <h5 class="card-title">Find Fragrances</h5>
+                                <p class="card-text">Search and discover new perfumes to add to your cabinet.</p>
+                                <a asp-page="/Fragrances" class="btn btn-primary">Browse</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="card h-100">
+                            <div class="card-body text-center">
+                                <h5 class="card-title">Recommendations</h5>
+                                <p class="card-text">Get personalised fragrance picks based on your preferences.</p>
+                                <a asp-page="/Recommend" class="btn btn-primary">Discover</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="card h-100">
+                            <div class="card-body text-center">
+                                <h5 class="card-title">My Cabinet</h5>
+                                <p class="card-text">View your collection and manage your preferences.</p>
+                                <a asp-page="/Cabinet" class="btn btn-primary">Open</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8 text-center">
+                <h1 class="display-3 fw-bold">Chez D'Arome</h1>
+                <p class="lead text-muted mb-4">Your personal scent space — discover, collect, and get recommendations tailored to your taste.</p>
+                <hr />
+                <div class="mt-4">
+                    <a asp-page="/Login" class="btn btn-primary btn-lg me-2">Log In</a>
+                    <a asp-page="/Register" class="btn btn-outline-secondary btn-lg">Create an Account</a>
+                </div>
+                <p class="text-muted mt-3"><small>Join to start building your fragrance cabinet and get personalised picks.</small></p>
+            </div>
+        </div>
+    </div>
+}
+
+<style>
+    .btn-primary {
+        background-color: #6f42c1;
+        border-color: #6f42c1;
+    }
+    .btn-primary:hover {
+        background-color: #5a32a3;
+    }
+    .card {
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+</style>
