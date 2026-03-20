@@ -28,7 +28,7 @@ string baseAddress = builder.Configuration["ApiBaseAddress"];
 builder.Services.AddHttpClient("ApiClient", client =>
 {
     client.BaseAddress = new Uri(baseAddress);
-    client.Timeout = TimeSpan.FromSeconds(10);
+    client.Timeout = TimeSpan.FromSeconds(30);
 });
 
 // Add session support

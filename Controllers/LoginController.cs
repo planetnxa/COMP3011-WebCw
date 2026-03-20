@@ -53,8 +53,8 @@ namespace WebAppComp3011.Controllers
 
                         if (user.FirstLogin)
                         {
-                            _logger.LogInformation($"User {username} is on first login - redirecting to Recommend.");
-                            return RedirectToAction("Index", "Recommend");
+                            _logger.LogInformation($"User {username} is on first login - redirecting to Setup.");
+                            return RedirectToAction("Index", "Setup");
                         }
 
                         return RedirectToAction("Index", "Fragrances");
@@ -149,7 +149,7 @@ namespace WebAppComp3011.Controllers
                         HttpContext.Session.SetString("UserId", createdUser.Id.ToString());
                         HttpContext.Session.SetString("Username", createdUser.Username);
                         _logger.LogInformation($"New user {username} registered and logged in.");
-                        return RedirectToAction("Index", "Recommend");
+                        return RedirectToAction("Index", "Setup");
                     }
                 }
                 else if (createResponse.StatusCode == System.Net.HttpStatusCode.BadRequest)

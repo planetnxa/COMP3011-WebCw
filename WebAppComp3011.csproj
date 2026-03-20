@@ -45,8 +45,4 @@
     </PackageReference>
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Views\Setup\" />
-  </ItemGroup>
-
 </Project>
