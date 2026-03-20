@@ -34,8 +34,8 @@ namespace WebAppComp3011.Services
                         {
                             Id = Convert.ToInt32(reader["Id"]),
                             UserId = Convert.ToInt32(reader["UserId"]),
-                            PrefVal = reader["PrefVal"]?.ToString(),
-                            PrefType = reader["PrefType"]?.ToString()
+                            PrefVal = reader["PrefVal"]?.ToString() ?? string.Empty,
+                            PrefType = reader["PrefType"]?.ToString() ?? string.Empty
                         };
                         list.Add(pref);
                     }
@@ -52,7 +52,7 @@ namespace WebAppComp3011.Services
         [HttpGet("{id:int}")]
         public async Task<ActionResult<UserPreference>> GetUserPreferenceById([FromRoute] int id)
         {
-            UserPreference pref = null;
+            UserPreference? pref = null;
 
             await using (var cn = new SqliteConnection(connectString))
             {
@@ -68,8 +68,8 @@ namespace WebAppComp3011.Services
                         {
                             Id = Convert.ToInt32(reader["Id"]),
                             UserId = Convert.ToInt32(reader["UserId"]),
-                            PrefVal = reader["PrefVal"]?.ToString(),
-                            PrefType = reader["PrefType"]?.ToString()
+                            PrefVal = reader["PrefVal"]?.ToString() ?? string.Empty,
+                            PrefType = reader["PrefType"]?.ToString() ?? string.Empty
                         };
                     }
                 }
@@ -104,8 +104,8 @@ namespace WebAppComp3011.Services
                         {
                             Id = Convert.ToInt32(reader["Id"]),
                             UserId = Convert.ToInt32(reader["UserId"]),
-                            PrefVal = reader["PrefVal"]?.ToString(),
-                            PrefType = reader["PrefType"]?.ToString()
+                            PrefVal = reader["PrefVal"]?.ToString() ?? string.Empty,
+                            PrefType = reader["PrefType"]?.ToString() ?? string.Empty
                         };
                         list.Add(pref);
                     }

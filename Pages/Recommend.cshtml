@@ -29,6 +29,8 @@
                 <a asp-page="/Cabinet" class="btn btn-outline-secondary">View My Cabinet</a>
             </div>
 
+            @Html.AntiForgeryToken()
+
             @if (Model.Recommendations == null || Model.Recommendations.Count == 0)
             {
                 <div class="alert alert-info">No recommendations available right now. Try refreshing.</div>
@@ -38,7 +40,7 @@
                 <div class="row">
                     @foreach (var frag in Model.Recommendations)
                     {
-                        <div class="col-md-4 mb-4">
+                        <div class="col-md-4 mb-4 fade-in-up">
                             <div class="card h-100">
                                 <div class="card-body">
                                     <h5 class="card-title">@frag.FragName</h5>
@@ -60,10 +62,7 @@
                                     </p>
                                 </div>
                                 <div class="card-footer">
-                                    <form method="post" asp-page-handler="AddToCabinet">
-                                        <input type="hidden" name="perfumeId" value="@frag.Id" />
-                                        <button type="submit" class="btn btn-success w-100">Add to Cabinet</button>
-                                    </form>
+                                    <button type="button" class="btn btn-cabinet w-100" onclick="addToCabinet(@frag.Id, this)">Add to Cabinet</button>
                                 </div>
                             </div>
                         </div>
@@ -73,3 +72,40 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        function getAntiForgeryToken() {
+            return document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+        }
+
+        async function addToCabinet(perfumeId, btn) {
+            const token = getAntiForgeryToken();
+            const cardFooter = btn.closest('.card-footer');
+
+            btn.disabled = true;
+            btn.innerHTML = 'Adding...';
+
+            try {
+                const response = await fetch(`/Recommend?handler=AddToCabinet`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'RequestVerificationToken': token
+                    },
+                    body: `perfumeId=${perfumeId}`,
+                    redirect: 'manual'
+                });
+
+                if (response.ok || response.type === 'opaqueredirect') {
+                    cardFooter.innerHTML = '<div class="alert alert-warning mb-0 py-1 text-center"><i class="bi bi-check-circle"></i> Added!</div>';
+                } else {
+                    cardFooter.innerHTML = '<div class="alert alert-danger mb-0 py-1 text-center">Failed to add. Please try again.</div>';
+                }
+            } catch (error) {
+                cardFooter.innerHTML = '<div class="alert alert-danger mb-0 py-1 text-center">An error occurred. Please try again.</div>';
+                console.error('Add to cabinet error:', error);
+            }
+        }
+    </script>
+}

@@ -9,11 +9,187 @@ body {
 }
 
 .btn {
-    border-radius: 14px;
+    border-radius: 6px;
 }
 
-h1{
+h1 {
     font-family: 'Gelasio';
     font-style: italic;
-    font-weight:bolder;
+    font-weight: bolder;
 }
+
+.card-title {
+    font-family: 'Gelasio', serif;
+    font-style: italic;
+}
+
+.navbar {
+    font-family: 'Gelasio', serif;
+    background-color: #fff8ea !important;
+    color: #3A0008;
+}
+
+.navbar .navbar-brand,
+.navbar .nav-link,
+.navbar .navbar-text {
+    color: #3A0008 !important;
+}
+
+.navbar .nav-link:hover,
+.navbar .nav-link:focus {
+    color: #9D1729 !important;
+}
+
+/* ── Fade-in-up animation ── */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in-up {
+    animation: fadeInUp 1.2s ease-out both;
+}
+
+/* ── Brand colour overrides ── */
+.btn-primary {
+    background-color: #9D1729;
+    border-color: #9D1729;
+    color: #fff;
+}
+
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active,
+.btn-primary:active:focus {
+    background-color: #7a1220;
+    border-color: #7a1220;
+    color: #fff;
+}
+
+.btn-outline-primary {
+    color: #9D1729;
+    border-color: #9D1729;
+}
+
+.btn-outline-primary:hover,
+.btn-outline-primary:focus,
+.btn-outline-primary:active {
+    background-color: #9D1729;
+    border-color: #9D1729;
+    color: #fff;
+}
+
+.bg-primary {
+    background-color: #9D1729 !important;
+}
+
+.btn-success {
+    background-color: #9D1729;
+    border-color: #9D1729;
+    color: #fff;
+}
+
+.btn-success:hover,
+.btn-success:focus,
+.btn-success:active,
+.btn-success:active:focus {
+    background-color: #7a1220;
+    border-color: #7a1220;
+    color: #fff;
+}
+
+.bg-success {
+    background-color: #9D1729 !important;
+}
+
+/* ── Add-to-Cabinet button ── */
+.btn-cabinet {
+    background-color: #fff;
+    border: 2px solid #3A0008;
+    color: #3A0008;
+}
+
+.btn-cabinet:hover,
+.btn-cabinet:focus,
+.btn-cabinet:active {
+    background-color: #3A0008;
+    border-color: #3A0008;
+    color: #fff;
+}
+
+/* ── Secondary buttons ── */
+.btn-secondary,
+.btn-outline-secondary {
+    background-color: #fff;
+    border: 2px solid #3A0008;
+    color: #3A0008;
+}
+
+.btn-secondary:hover,
+.btn-secondary:focus,
+.btn-secondary:active,
+.btn-outline-secondary:hover,
+.btn-outline-secondary:focus,
+.btn-outline-secondary:active {
+    background-color: #3A0008;
+    border-color: #3A0008;
+    color: #fff;
+}
+
+/* ── Section headings ── */
+.section-title {
+    font-family: 'Gelasio', serif;
+    font-style: normal;
+    font-weight: bold;
+}
+
+/* ── Alerts: transparent background, #3A0008 text ── */
+.alert-info,
+.alert-warning,
+.alert-danger,
+.alert-success {
+    background-color: transparent;
+    border-color: #3A0008;
+    color: #3A0008;
+}
+
+/* ── Links: black, bold, underlined ── */
+a:not(.btn):not(.nav-link):not(.navbar-brand) {
+    color: #000;
+    font-weight: bold;
+    text-decoration: underline;
+}
+
+a:not(.btn):not(.nav-link):not(.navbar-brand):hover,
+a:not(.btn):not(.nav-link):not(.navbar-brand):focus {
+    color: #3A0008;
+}
+
+/* ── Table shadow ── */
+.table-responsive {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    border-radius: 8px;
+}
+
+/* ── Danger / Remove button ── */
+.btn-danger {
+    background-color: #9D1729;
+    border-color: #9D1729;
+    color: #fff;
+}
+
+.btn-danger:hover,
+.btn-danger:focus,
+.btn-danger:active,
+.btn-danger:active:focus {
+    background-color: #7a1220;
+    border-color: #7a1220;
+    color: #fff;
+}
+

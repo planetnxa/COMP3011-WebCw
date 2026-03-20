@@ -9,11 +9,10 @@
     <div class="container mt-5">
         <div class="row justify-content-center">
             <div class="col-md-8 text-center">
-                <h1>Welcome back, @Model.Username</h1>
-                <p class="lead text-muted">What would you like to do today?</p>
-                <hr />
+                <h1 class="fade-in-up">Welcome back, @Model.DisplayName</h1>
+                <p class="lead text-muted">Let's get you some new scents'</p>
                 <div class="row mt-4">
-                    <div class="col-md-4 mb-3">
+                    <div class="col-md-4 mb-3 fade-in-up" style="animation-delay: 0.1s;">
                         <div class="card h-100">
                             <div class="card-body text-center">
                                 <h5 class="card-title">Find Fragrances</h5>
@@ -22,7 +21,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-4 mb-3">
+                    <div class="col-md-4 mb-3 fade-in-up" style="animation-delay: 0.25s;">
                         <div class="card h-100">
                             <div class="card-body text-center">
                                 <h5 class="card-title">Recommendations</h5>
@@ -31,7 +30,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-4 mb-3">
+                    <div class="col-md-4 mb-3 fade-in-up" style="animation-delay: 0.4s;">
                         <div class="card h-100">
                             <div class="card-body text-center">
                                 <h5 class="card-title">My Cabinet</h5>
@@ -50,28 +49,16 @@ else
     <div class="container mt-5">
         <div class="row justify-content-center">
             <div class="col-md-8 text-center">
-                <h1 class="display-3 fw-bold">Chez D'Arome</h1>
-                <p class="lead text-muted mb-4">Your personal scent space — discover, collect, and get recommendations tailored to your taste.</p>
+                <h1 class="display-3 fw-bold fade-in-up">Chez D'Arome</h1>
+                <p class="lead text-muted mb-4">Your personal scent space.</p>
                 <hr />
-                <div class="mt-4">
+                <div class="mt-4 p-5">
+                <br>
                     <a asp-page="/Login" class="btn btn-primary btn-lg me-2">Log In</a>
                     <a asp-page="/Register" class="btn btn-outline-secondary btn-lg">Create an Account</a>
                 </div>
-                <p class="text-muted mt-3"><small>Join to start building your fragrance cabinet and get personalised picks.</small></p>
             </div>
         </div>
     </div>
 }
 
-<style>
-    .btn-primary {
-        background-color: #6f42c1;
-        border-color: #6f42c1;
-    }
-    .btn-primary:hover {
-        background-color: #5a32a3;
-    }
-    .card {
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-</style>

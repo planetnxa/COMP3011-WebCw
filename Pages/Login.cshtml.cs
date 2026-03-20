@@ -50,6 +50,7 @@ namespace WebAppComp3011.Pages
                     {
                         HttpContext.Session.SetString("UserId", user.Id.ToString());
                         HttpContext.Session.SetString("Username", user.Username);
+                        HttpContext.Session.SetString("Name", user.Name ?? user.Username);
                         _logger.LogInformation($"User {Username} logged in successfully.");
 
                         if (user.FirstLogin)

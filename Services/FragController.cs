@@ -24,7 +24,7 @@ namespace WebAppComp3011.Controllers
         [HttpGet("{id:int}")]
         public async Task<ActionResult<Fragrance>> GetFragrance(int id)
         {
-            Fragrance frag = null; // then if null give 404
+            Fragrance? frag = null; // then if null give 404
 
             await using (var cn = new SqliteConnection(connectString))
             {
@@ -39,15 +39,15 @@ namespace WebAppComp3011.Controllers
                         frag = new Fragrance()
                         {
                             Id = Convert.ToInt32(reader["perfumeId"]),
-                            FragUrl = reader["url"]?.ToString(),
-                            FragName = reader["Perfume"]?.ToString(),
-                            Brand = reader["Brand"]?.ToString(),
-                            Country = reader["Country"]?.ToString(),
-                            Gender = reader["Gender"]?.ToString(),
-                            Rating = float.TryParse(reader["Rating"].ToString(), out var r) ? r: 0f,
-                            Year = reader["Year"]?.ToString(),
-                            Accords = reader["Accords"]?.ToString()?.Split('\'').ToList(),
-                            Perfumers = reader["Perfumers"]?.ToString(),
+                            FragUrl = reader["url"]?.ToString() ?? string.Empty,
+                            FragName = reader["Perfume"]?.ToString() ?? string.Empty,
+                            Brand = reader["Brand"]?.ToString() ?? string.Empty,
+                            Country = reader["Country"]?.ToString() ?? string.Empty,
+                            Gender = reader["Gender"]?.ToString() ?? string.Empty,
+                            Rating = float.TryParse(reader["Rating"]?.ToString(), out var r) ? r: 0f,
+                            Year = reader["Year"]?.ToString() ?? string.Empty,
+                            Accords = reader["Accords"]?.ToString()?.Split('\'').ToList() ?? new List<string>(),
+                            Perfumers = reader["Perfumers"]?.ToString() ?? string.Empty,
                             Notes = new Notes() { Top = new List<string>(), Middle = new List<string>(), Base = new List<string>() }
                         };
 
@@ -289,7 +289,7 @@ namespace WebAppComp3011.Controllers
 
 
         // Helper function for getting fragrances with different filters (brand, accord, note)
-        private async Task<List<Fragrance>> GetFragranceBase(string sql, Dictionary<string, object> parameters)
+        private async Task<List<Fragrance>> GetFragranceBase(string sql, Dictionary<string, object>? parameters)
         {
             var results = new List<Fragrance>();
 
@@ -313,15 +313,15 @@ namespace WebAppComp3011.Controllers
                 var frag = new Fragrance
                 {
                     Id = Convert.ToInt32(reader["perfumeId"]),
-                    FragUrl = reader["url"]?.ToString(),
-                    FragName = reader["Perfume"]?.ToString(),
-                    Brand = reader["Brand"]?.ToString(),
-                    Country = reader["Country"]?.ToString(),
-                    Gender = reader["Gender"]?.ToString(),
+                    FragUrl = reader["url"]?.ToString() ?? string.Empty,
+                    FragName = reader["Perfume"]?.ToString() ?? string.Empty,
+                    Brand = reader["Brand"]?.ToString() ?? string.Empty,
+                    Country = reader["Country"]?.ToString() ?? string.Empty,
+                    Gender = reader["Gender"]?.ToString() ?? string.Empty,
                     Rating = float.TryParse(reader["Rating"]?.ToString(), out var r) ? r : 0f,
-                    Year = reader["Year"]?.ToString(),
+                    Year = reader["Year"]?.ToString() ?? string.Empty,
                     Accords = reader["Accords"]?.ToString()?.Split(',').ToList() ?? new List<string>(),
-                    Perfumers = reader["Perfumers"]?.ToString(),
+                    Perfumers = reader["Perfumers"]?.ToString() ?? string.Empty,
                     Notes = await ReadNotes(Convert.ToInt32(reader["perfumeId"]))
                 };
 

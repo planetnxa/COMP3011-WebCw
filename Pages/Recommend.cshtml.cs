@@ -132,7 +132,7 @@ namespace WebAppComp3011.Pages
                 var cabinet = new UserCabinet
                 {
                     UserId = int.Parse(userId),
-                    Username = username,
+                    Username = username ?? string.Empty,
                     PerfumeId = perfumeId,
                     Comments = ""
                 };
@@ -147,7 +147,7 @@ namespace WebAppComp3011.Pages
                 _logger.LogError($"Add to cabinet error: {ex.Message}");
             }
 
-            return RedirectToPage();
+            return new OkResult();
         }
     }
 }
