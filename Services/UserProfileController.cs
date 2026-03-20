@@ -12,7 +12,12 @@ namespace WebAppComp3011.Services
     [ApiController]
     public class UserProfileController : ControllerBase
     {
-        private string connectString = "Data Source=fragranceDB.db";
+        private readonly string connectString;
+
+        public UserProfileController(IConfiguration configuration)
+        {
+            connectString = configuration.GetConnectionString("FragranceDb") ?? "Data Source=fragranceDB.db";
+        }
 
         /// <summary>
         ///  Get all user profiles from db
@@ -34,9 +39,9 @@ namespace WebAppComp3011.Services
                         var profile = new UserProfile()
                         {
                             Id = Convert.ToInt32(reader["id"]),
-                            Username = reader["username"]?.ToString(),
-                            Password = reader["password"]?.ToString(),
-                            Name = reader["name"]?.ToString(),
+                            Username = reader["username"]?.ToString() ?? string.Empty,
+                            Password = reader["password"]?.ToString() ?? string.Empty,
+                            Name = reader["name"]?.ToString() ?? string.Empty,
                             FirstLogin = reader["firstLogin"] != DBNull.Value ? Convert.ToInt32(reader["firstLogin"]) != 0 : false
                         };
                         list.Add(profile);
@@ -54,7 +59,7 @@ namespace WebAppComp3011.Services
         [HttpGet("{id:int}")]
         public async Task<ActionResult<UserProfile>> GetUserProfileById([FromRoute] int id)
         {
-            UserProfile profile = null;
+            UserProfile? profile = null;
 
             await using (var cn = new SqliteConnection(connectString))
             {
@@ -69,9 +74,9 @@ namespace WebAppComp3011.Services
                         profile = new UserProfile()
                         {
                             Id = Convert.ToInt32(reader["id"]),
-                            Username = reader["username"]?.ToString(),
-                            Password = reader["password"]?.ToString(),
-                            Name = reader["name"]?.ToString(),
+                            Username = reader["username"]?.ToString() ?? string.Empty,
+                            Password = reader["password"]?.ToString() ?? string.Empty,
+                            Name = reader["name"]?.ToString() ?? string.Empty,
                             FirstLogin = reader["firstLogin"] != DBNull.Value ? Convert.ToInt32(reader["firstLogin"]) != 0 : false
                         };
                     }
@@ -92,7 +97,7 @@ namespace WebAppComp3011.Services
         [HttpGet("username/{username}")]
         public async Task<ActionResult<UserProfile>> GetUserProfileByUsername([FromRoute] string username)
         {
-            UserProfile profile = null;
+            UserProfile? profile = null;
 
             await using (var cn = new SqliteConnection(connectString))
             {
@@ -107,9 +112,9 @@ namespace WebAppComp3011.Services
                         profile = new UserProfile()
                         {
                             Id = Convert.ToInt32(reader["id"]),
-                            Username = reader["username"]?.ToString(),
-                            Password = reader["password"]?.ToString(),
-                            Name = reader["name"]?.ToString(),
+                            Username = reader["username"]?.ToString() ?? string.Empty,
+                            Password = reader["password"]?.ToString() ?? string.Empty,
+                            Name = reader["name"]?.ToString() ?? string.Empty,
                             FirstLogin = reader["firstLogin"] != DBNull.Value ? Convert.ToInt32(reader["firstLogin"]) != 0 : false
                         };
                     }

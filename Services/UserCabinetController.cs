@@ -35,10 +35,10 @@ namespace WebAppComp3011.Services
                         var entry = new UserCabinet()
                         {
                             Id = Convert.ToInt32(reader["id"]),
-                            Username = reader["username"]?.ToString(),
+                            Username = reader["username"]?.ToString() ?? string.Empty,
                             PerfumeId = reader["perfumeId"] != DBNull.Value ? Convert.ToInt32(reader["perfumeId"]) : (int?)null,
                             UserId = reader["userId"] != DBNull.Value ? Convert.ToInt32(reader["userId"]) : (int?)null,
-                            Comments = reader["comments"]?.ToString()
+                            Comments = reader["comments"]?.ToString() ?? string.Empty
                         };
                         list.Add(entry);
                     }
@@ -55,7 +55,7 @@ namespace WebAppComp3011.Services
         [HttpGet("{id:int}")]
         public async Task<ActionResult<UserCabinet>> GetUserCabinetById([FromRoute] int id)
         {
-            UserCabinet entry = null;
+            UserCabinet? entry = null;
 
             await using (var cn = new SqliteConnection(connectString))
             {
@@ -70,10 +70,10 @@ namespace WebAppComp3011.Services
                         entry = new UserCabinet()
                         {
                             Id = Convert.ToInt32(reader["id"]),
-                            Username = reader["username"]?.ToString(),
+                            Username = reader["username"]?.ToString() ?? string.Empty,
                             PerfumeId = reader["perfumeId"] != DBNull.Value ? Convert.ToInt32(reader["perfumeId"]) : (int?)null,
                             UserId = reader["userId"] != DBNull.Value ? Convert.ToInt32(reader["userId"]) : (int?)null,
-                            Comments = reader["comments"]?.ToString()
+                            Comments = reader["comments"]?.ToString() ?? string.Empty
                         };
                     }
                 }
@@ -107,10 +107,10 @@ namespace WebAppComp3011.Services
                         var entry = new UserCabinet()
                         {
                             Id = Convert.ToInt32(reader["id"]),
-                            Username = reader["username"]?.ToString(),
+                            Username = reader["username"]?.ToString() ?? string.Empty,
                             PerfumeId = reader["perfumeId"] != DBNull.Value ? Convert.ToInt32(reader["perfumeId"]) : (int?)null,
                             UserId = reader["userId"] != DBNull.Value ? Convert.ToInt32(reader["userId"]) : (int?)null,
-                            Comments = reader["comments"]?.ToString()
+                            Comments = reader["comments"]?.ToString() ?? string.Empty
                         };
                         list.Add(entry);
                     }
@@ -121,7 +121,7 @@ namespace WebAppComp3011.Services
         }
 
         /// <summary>
-        ///  which users have a specific perfume in their cabinet 
+        ///  which users have a specific perfume in their cabinet
         /// </summary>
         // GET: api/UserCabinet/perfume/{perfumeId}
         [HttpGet("perfume/{perfumeId}")]
@@ -141,10 +141,10 @@ namespace WebAppComp3011.Services
                         var entry = new UserCabinet()
                         {
                             Id = Convert.ToInt32(reader["id"]),
-                            Username = reader["username"]?.ToString(),
+                            Username = reader["username"]?.ToString() ?? string.Empty,
                             PerfumeId = reader["perfumeId"] != DBNull.Value ? Convert.ToInt32(reader["perfumeId"]) : (int?)null,
                             UserId = reader["userId"] != DBNull.Value ? Convert.ToInt32(reader["userId"]) : (int?)null,
-                            Comments = reader["comments"]?.ToString()
+                            Comments = reader["comments"]?.ToString() ?? string.Empty
                         };
                         list.Add(entry);
                     }
@@ -155,7 +155,7 @@ namespace WebAppComp3011.Services
         }
 
         /// <summary>
-        ///  Add entry to user cabinet and return said entry
+        ///  Add entry to user cabinet
         /// </summary>
         // POST: api/UserCabinet
         [HttpPost]

@@ -16,10 +16,25 @@
                     <h5 class="mb-0">Search for Fragrances</h5>
                 </div>
                 <div class="card-body">
+                    @if (!ViewData.ModelState.IsValid)
+                    {
+                        <div class="alert alert-danger">
+                            @foreach (var modelState in ViewData.ModelState.Values)
+                            {
+                                @foreach (var error in modelState.Errors)
+                                {
+                                    <div>@error.ErrorMessage</div>
+                                }
+                            }
+                        </div>
+                    }
+
+                    @Html.AntiForgeryToken()
+
                     <div class="mb-3">
                         <div class="row g-2 mb-3">
                             <div class="col-md-6">
-                                <label for="SearchQuery" class="form-label">Search Query</label>
+                                <label for="SearchQuery" class="form-label"> I want ....</label>
                                 <input type="text" class="form-control" id="SearchQuery" placeholder="Enter fragrance name, brand, etc." required>
                             </div>
                             <div class="col-md-4">
@@ -44,18 +59,6 @@
     </div>
 </div>
 
-<style>
-    .card {
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    .btn-primary {
-        background-color: #6f42c1;
-        border-color: #6f42c1;
-    }
-    .btn-primary:hover {
-        background-color: #5a32a3;
-    }
-</style>
 
 @section Scripts {
     <script>
@@ -99,7 +102,7 @@
                     return;
                 }
 
-                let html = `<div class="search-results mt-4"><h5>Search Results (${fragrances.length})</h5><div class="row">`;
+                let html = `<div class="search-results mt-4"><h5>Search Results (${fragrances.length} found)</h5><div class="row">`;
 
                 fragrances.forEach(fragrance => {
                     const rating = fragrance.rating > 0 ? `<br><strong>Rating:</strong> ${fragrance.rating.toFixed(1)} / 10` : '';
@@ -117,13 +120,9 @@
                                     </p>
                                 </div>
                                 <div class="card-footer bg-light">
-                                    <form method="post" action="/Fragrances?handler=AddToCabinet" style="display:inline;">
-                                        <input type="hidden" name="__RequestVerificationToken" value="${token}">
-                                        <input type="hidden" name="fragranceId" value="${fragrance.id}">
-                                        <button type="submit" class="btn btn-sm btn-success w-100">
-                                            <i class="bi bi-plus-circle"></i> Add to Cabinet
-                                        </button>
-                                    </form>
+                                    <button type="button" class="btn btn-sm btn-cabinet w-100" onclick="addToCabinet(${fragrance.id}, this)">
+                                        <i class="bi bi-plus-circle"></i> Add to Cabinet
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -137,6 +136,35 @@
                 console.error('Search error:', error);
             }
         });
+
+        async function addToCabinet(fragranceId, btn) {
+            const token = getAntiForgeryToken();
+            const cardFooter = btn.closest('.card-footer');
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Adding...';
+
+            try {
+                const response = await fetch(`/Fragrances?handler=AddToCabinet`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'RequestVerificationToken': token
+                    },
+                    body: `fragranceId=${fragranceId}`,
+                    redirect: 'manual'
+                });
+
+                if (response.ok || response.type === 'opaqueredirect') {
+                    cardFooter.innerHTML = '<div class="alert alert-warning mb-0 py-1 text-center"><i class="bi bi-check-circle"></i> Successfully added</div>';
+                } else {
+                    cardFooter.innerHTML = '<div class="alert alert-danger mb-0 py-1 text-center">Failed to add. Please try again.</div>';
+                }
+            } catch (error) {
+                cardFooter.innerHTML = '<div class="alert alert-danger mb-0 py-1 text-center">An error occurred. Please try again.</div>';
+                console.error('Add to cabinet error:', error);
+            }
+        }
 
         document.getElementById('SearchQuery').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {

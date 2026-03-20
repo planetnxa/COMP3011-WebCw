@@ -6,7 +6,7 @@ namespace WebAppComp3011.Models
     {
         public int Id { get; set; }
         public int UserId { get; set; }
-        public string PrefVal { get; set; }
-        public string PrefType { get; set; }
+        public string PrefVal { get; set; } = string.Empty;
+        public string PrefType { get; set; } = string.Empty;
     }
 }

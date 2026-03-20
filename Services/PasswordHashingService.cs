@@ -8,7 +8,7 @@ namespace WebAppComp3011.Services
         /// <summary>
         /// Hash a password using SHA256 with a salt
         /// </summary>
-        public static string HashPassword(string password, string username = null, bool isDevelopment = false)
+        public static string HashPassword(string password, string? username = null, bool isDevelopment = false)
         {
             if (string.IsNullOrWhiteSpace(password))
                 return string.Empty;

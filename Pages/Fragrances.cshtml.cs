@@ -45,7 +45,6 @@ namespace WebAppComp3011.Pages
                 {
                     "brand" => $"api/frag/brand/{Uri.EscapeDataString(request.SearchQuery)}",
                     "accord" => $"api/frag/accord/{Uri.EscapeDataString(request.SearchQuery)}",
-                    "notes" => $"api/frag/note/{Uri.EscapeDataString(request.SearchQuery)}",
                     _ => $"api/frag/name/{Uri.EscapeDataString(request.SearchQuery)}"
                 };
                 _logger.LogInformation($"Calling API endpoint: {httpClient.BaseAddress}{endpoint}");
@@ -80,7 +79,7 @@ namespace WebAppComp3011.Pages
                 var cabinet = new UserCabinet
                 {
                     UserId = int.Parse(userId),
-                    Username = username,
+                    Username = username ?? string.Empty,
                     PerfumeId = fragranceId,
                     Comments = ""
                 };

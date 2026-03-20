@@ -87,6 +87,7 @@ namespace WebAppComp3011.Pages
                     {
                         HttpContext.Session.SetString("UserId", createdUser.Id.ToString());
                         HttpContext.Session.SetString("Username", createdUser.Username);
+                        HttpContext.Session.SetString("Name", createdUser.Name ?? createdUser.Username);
                         _logger.LogInformation($"New user {Username} registered and logged in.");
                         return RedirectToPage("/Setup");
                     }

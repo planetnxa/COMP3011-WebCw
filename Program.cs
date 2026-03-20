@@ -23,7 +23,7 @@ builder.Services.AddRazorPages();
 builder.Services.AddScoped<UserProfileController>();
 
 // Register HttpClient with base address for API calls
-string baseAddress = builder.Configuration["ApiBaseAddress"];
+string baseAddress = builder.Configuration["ApiBaseAddress"] ?? "";
 builder.Services.AddHttpClient("ApiClient", client =>
 {
     client.BaseAddress = new Uri(baseAddress);
@@ -76,3 +76,5 @@ app.MapControllers();
 app.MapRazorPages();
 
 app.Run();
+
+public partial class Program { }
