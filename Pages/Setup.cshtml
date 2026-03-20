@@ -8,7 +8,7 @@
     <div class="row">
         <div class="col-md-8 offset-md-2">
             <h1>Hey...sooo, what's your type? ;)</h1>
-            <p class="lead">Tell us what you're into, so we know what scents to recommend </p>
+            <p class="lead">So we know what scents to recommend </p>
 
             <!-- Search Section -->
             <div class="card mb-4">
@@ -17,6 +17,9 @@
                 </div>
                 <div class="card-body">
                     <p class="text-muted mb-3">Search for brands, accords, or fragrance names you enjoy, then save them as preferences.</p>
+
+                    @Html.AntiForgeryToken()
+
                     <div class="mb-3">
                         <div class="row g-2 mb-3">
                             <div class="col-md-6">
@@ -104,43 +107,24 @@
                 const fragrances = await response.json();
 
                 if (fragrances.length === 0) {
-                    resultsContainer.innerHTML = '<div class="alert alert-info">We haven't seen that BeforeUnloadEvent :/ try again..</div>';
+                    resultsContainer.innerHTML = '<div class="alert alert-info">No fragrances found matching your search. Try a different query or search type.</div>';
                     return;
                 }
 
-                // Collect unique values based on search type for preference saving
-                let uniqueValues = new Set();
-                fragrances.forEach(f => {
-                    if (searchType === 'brand') uniqueValues.add(f.brand);
-                    else if (searchType === 'accord') {
-                        if (f.accords) f.accords.forEach(a => {
-                            if (a.toLowerCase().includes(searchQuery.toLowerCase())) uniqueValues.add(a.trim());
-                        });
-                    }
-                    else uniqueValues.add(f.fragName);
-                });
-
-                let html = `<div class="search-results mt-4">`;
-                html += `<h5>Search Results (${fragrances.length} fragrances found)</h5>`;
+                let html = `<div class="search-results mt-4"><h5>Search Results (${fragrances.length} found)</h5>`;
 
                 // Show a quick-save button for the search term itself
                 html += `
                     <div class="alert alert-success d-flex justify-content-between align-items-center mb-3">
                         <span>Save <strong>"${searchQuery}"</strong> as a <strong>${searchType}</strong> preference?</span>
-                        <form method="post" action="/Setup?handler=AddPreference" style="display:inline;">
-                            <input type="hidden" name="__RequestVerificationToken" value="${token}">
-                            <input type="hidden" name="prefVal" value="${searchQuery}">
-                            <input type="hidden" name="prefType" value="${searchType}">
-                            <button type="submit" class="btn btn-sm btn-success">
-                                <i class="bi bi-plus-circle"></i> Save Preference
-                            </button>
-                        </form>
+                        <button type="button" class="btn btn-sm btn-success" onclick="savePreference('${searchQuery.replace(/'/g, "\\'")}', '${searchType}', this)">
+                            Save Preference
+                        </button>
                     </div>
                 `;
 
-                // Show preview of matching fragrances
                 html += `<div class="row">`;
-                fragrances.slice(0, 6).forEach(fragrance => {
+                fragrances.forEach(fragrance => {
                     const rating = fragrance.rating > 0 ? `<br><strong>Rating:</strong> ${fragrance.rating.toFixed(1)} / 10` : '';
                     html += `
                         <div class="col-md-6 mb-3">
@@ -159,6 +143,7 @@
                         </div>
                     `;
                 });
+
                 html += `</div></div>`;
                 resultsContainer.innerHTML = html;
             } catch (error) {
@@ -166,6 +151,37 @@
                 console.error('Search error:', error);
             }
         });
+
+        async function savePreference(prefVal, prefType, btn) {
+            const token = getAntiForgeryToken();
+            btn.disabled = true;
+            btn.textContent = 'Saving...';
+
+            try {
+                const response = await fetch(`/Setup?handler=AddPreference`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'RequestVerificationToken': token
+                    },
+                    body: `prefVal=${encodeURIComponent(prefVal)}&prefType=${encodeURIComponent(prefType)}`,
+                    redirect: 'manual'
+                });
+
+                if (response.ok || response.type === 'opaqueredirect') {
+                    btn.textContent = 'Saved!';
+                    btn.classList.remove('btn-success');
+                    btn.classList.add('btn-outline-success');
+                } else {
+                    btn.textContent = 'Failed - try again';
+                    btn.disabled = false;
+                }
+            } catch (error) {
+                console.error('Save preference error:', error);
+                btn.textContent = 'Error - try again';
+                btn.disabled = false;
+            }
+        }
 
         document.getElementById('SearchQuery').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
