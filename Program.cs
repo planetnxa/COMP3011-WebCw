@@ -16,6 +16,10 @@ builder.Services.AddDbContext<FragranceContext>(options =>
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
+// Enable Razor Pages for frontend views
+builder.Services.AddRazorPages();
+
+
 // Register services for dependency injection
 builder.Services.AddScoped<UserProfileService>();
 
@@ -73,11 +77,16 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseStaticFiles();
+
 app.UseSession();
 
 app.UseAuthorization();
 
 app.MapControllerRoute(name:"default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+// Map Razor Pages for frontend
+app.MapRazorPages();
 
 app.Run();

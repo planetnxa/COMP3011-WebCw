@@ -8,10 +8,18 @@ namespace WebAppComp3011.Services
         /// <summary>
         /// Hash a password using SHA256 with a salt
         /// </summary>
-        public static string HashPassword(string password)
+        public static string HashPassword(string password, string username = null, bool isDevelopment = false)
         {
             if (string.IsNullOrWhiteSpace(password))
                 return string.Empty;
+
+            // If in development mode and username is abc, def, or xyz, skip hashing
+            if (isDevelopment && username != null)
+            {
+                var devUsers = new[] { "abc", "def", "xyz" };
+                if (devUsers.Contains(username.ToLowerInvariant()))
+                    return password;
+            }
 
             // Generate a random salt (16 bytes)
             byte[] salt = new byte[16];

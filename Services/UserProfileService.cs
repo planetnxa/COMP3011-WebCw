@@ -130,6 +130,8 @@ namespace WebAppComp3011.Services
         public async Task<ActionResult<UserProfile>> PostUserProfile([FromBody] UserProfile profile)
         {
             int newId = 0;
+            // Determine if we are in development mode
+            bool isDevelopment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development";
             await using (var cn = new SqliteConnection(connectString))
             {
                 await cn.OpenAsync();
@@ -139,11 +141,11 @@ namespace WebAppComp3011.Services
                     SELECT last_insert_rowid();";
 
                 cmd.Parameters.AddWithValue("@username", profile.Username ?? string.Empty);
-                // Hash password before storing if it's not already hashed (check length > 20 suggests it's hashed)
+                // Hash password before storing
                 string passwordToStore = profile.Password;
                 if (passwordToStore != null && passwordToStore.Length < 20)
                 {
-                    passwordToStore = PasswordHashingService.HashPassword(passwordToStore);
+                    passwordToStore = PasswordHashingService.HashPassword(passwordToStore, profile.Username, isDevelopment);
                 }
                 cmd.Parameters.AddWithValue("@password", passwordToStore ?? string.Empty);
                 cmd.Parameters.AddWithValue("@name", profile.Name ?? string.Empty);
@@ -169,6 +171,7 @@ namespace WebAppComp3011.Services
                 return BadRequest();
 
             int rowsAffected = 0;
+            bool isDevelopment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development";
             await using (var cn = new SqliteConnection(connectString))
             {
                 await cn.OpenAsync();
@@ -181,11 +184,11 @@ namespace WebAppComp3011.Services
                     WHERE id = @id";
 
                 cmd.Parameters.AddWithValue("@username", profile.Username ?? string.Empty);
-                // Hash password before storing if it's not already hashed (check length > 20 suggests it's hashed)
+                // Hash password before storing
                 string passwordToStore = profile.Password;
                 if (passwordToStore != null && passwordToStore.Length < 20)
                 {
-                    passwordToStore = PasswordHashingService.HashPassword(passwordToStore);
+                    passwordToStore = PasswordHashingService.HashPassword(passwordToStore, profile.Username, isDevelopment);
                 }
                 cmd.Parameters.AddWithValue("@password", passwordToStore ?? string.Empty);
                 cmd.Parameters.AddWithValue("@name", profile.Name ?? string.Empty);
