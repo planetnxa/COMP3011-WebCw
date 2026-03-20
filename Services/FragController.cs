@@ -11,9 +11,12 @@ namespace WebAppComp3011.Controllers
     [ApiController]
     public class FragController : ControllerBase
     {
+        private readonly string connectString;
 
-        private string connectString = "Data Source=fragranceDB.db";
-        //var connection = new SqliteConnection(connectString);
+        public FragController(IConfiguration configuration)
+        {
+            connectString = configuration.GetConnectionString("FragranceDb") ?? "Data Source=fragranceDB.db";
+        }
 
 
         

@@ -63,7 +63,7 @@ namespace WebAppComp3011.Pages
                     }
                     else
                     {
-                        ModelState.AddModelError("", "Invalid password.");
+                        ModelState.AddModelError("", "Invalid login, try again.");
                         return Page();
                     }
                 }

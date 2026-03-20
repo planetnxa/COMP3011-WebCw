@@ -7,8 +7,8 @@
 <div class="container mt-5">
     <div class="row">
         <div class="col-md-8 offset-md-2">
-            <h1>Welcome! Let's Set Up Your Preferences</h1>
-            <p class="lead">Tell us what you like — search by brand, accord, or name and save your preferences. We'll use these to recommend fragrances for you.</p>
+            <h1>Hey...sooo, what's your type? ;)</h1>
+            <p class="lead">Tell us what you're into, so we know what scents to recommend </p>
 
             <!-- Search Section -->
             <div class="card mb-4">
@@ -20,7 +20,7 @@
                     <div class="mb-3">
                         <div class="row g-2 mb-3">
                             <div class="col-md-6">
-                                <label for="SearchQuery" class="form-label">Search Query</label>
+                                <label for="SearchQuery" class="form-label">I like....</label>
                                 <input type="text" class="form-control" id="SearchQuery" placeholder="e.g. Chanel, woody, vanilla..." required>
                             </div>
                             <div class="col-md-4">
@@ -45,7 +45,7 @@
             <div class="card">
                 <div class="card-body">
                     <p class="text-muted">
-                        You can add more preferences now or skip this step and set them up later in your cabinet.
+                        You can add more preferences now or skip this step (you can always come back and update it!)
                     </p>
                     <div class="d-flex gap-2">
                         <form method="post" asp-page-handler="CompleteSetup">
@@ -104,7 +104,7 @@
                 const fragrances = await response.json();
 
                 if (fragrances.length === 0) {
-                    resultsContainer.innerHTML = '<div class="alert alert-info">No fragrances found matching your search. Try a different query or type.</div>';
+                    resultsContainer.innerHTML = '<div class="alert alert-info">We haven't seen that BeforeUnloadEvent :/ try again..</div>';
                     return;
                 }
 

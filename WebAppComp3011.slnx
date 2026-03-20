@@ -1,3 +1,6 @@
 <Solution>
+  <Folder Name="/Tests/">
+    <Project Path="Tests/ApiTests/ApiTests.csproj" />
+  </Folder>
   <Project Path="WebAppComp3011.csproj" />
 </Solution>

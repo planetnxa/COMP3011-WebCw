@@ -12,7 +12,12 @@ namespace WebAppComp3011.Services
     [ApiController]
     public class UserProfileController : ControllerBase
     {
-        private string connectString = "Data Source=fragranceDB.db";
+        private readonly string connectString;
+
+        public UserProfileController(IConfiguration configuration)
+        {
+            connectString = configuration.GetConnectionString("FragranceDb") ?? "Data Source=fragranceDB.db";
+        }
 
         /// <summary>
         ///  Get all user profiles from db

@@ -103,7 +103,7 @@ namespace WebAppComp3011.Pages
                 return RedirectToPage("/Index");
 
             await SetFirstLoginFalseAsync(userId);
-            return RedirectToPage("/Fragrances");
+            return RedirectToPage("/Recommend");
         }
 
         public async Task<IActionResult> OnPostSkipSetupAsync()

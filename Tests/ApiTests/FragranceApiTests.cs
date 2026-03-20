@@ -1,43 +1,23 @@
 using System.Net;
 using System.Net.Http.Json;
-using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.EntityFrameworkCore;
-using WebAppComp3011.Data;
 using WebAppComp3011.Models;
 using Xunit;
 
 namespace Tests.ApiTests;
 
-public class FragranceApiTests : IClassFixture<WebApplicationFactory<Program>>
+public class FragranceApiTests : IClassFixture<TestWebApplicationFactory>
 {
-    private readonly WebApplicationFactory<Program> _factory;
+    private readonly HttpClient _client;
 
-    public FragranceApiTests(WebApplicationFactory<Program> factory)
+    public FragranceApiTests(TestWebApplicationFactory factory)
     {
-        _factory = factory.WithWebHostBuilder(builder =>
-        {
-            builder.ConfigureServices(services =>
-            {
-                // Replace FragranceContext with InMemory DB for tests
-                var descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<FragranceContext>));
-                if (descriptor != null)
-                    services.Remove(descriptor);
-
-                services.AddDbContext<FragranceContext>(options =>
-                {
-                    options.UseInMemoryDatabase("TestFragranceDb");
-                });
-            });
-        });
+        _client = factory.CreateClient();
     }
 
     [Fact]
     public async Task Get_Fragrance_Returns_NotFound_For_Missing()
     {
-        var client = _factory.CreateClient();
-
-        var res = await client.GetAsync("/api/fragrances/9999");
+        var res = await _client.GetAsync("/api/frag/9999");
 
         Assert.Equal(HttpStatusCode.NotFound, res.StatusCode);
     }
@@ -45,16 +25,14 @@ public class FragranceApiTests : IClassFixture<WebApplicationFactory<Program>>
     [Fact]
     public async Task Create_And_Get_Fragrance()
     {
-        var client = _factory.CreateClient();
-
         var newFrag = new Fragrance { FragName = "Test", Brand = "X" };
-        var post = await client.PostAsJsonAsync("/api/frag", newFrag);
+        var post = await _client.PostAsJsonAsync("/api/frag", newFrag);
         Assert.Equal(HttpStatusCode.Created, post.StatusCode);
 
         var created = await post.Content.ReadFromJsonAsync<Fragrance>();
         Assert.NotNull(created);
 
-        var get = await client.GetAsync($"/api/frag/{created.Id}");
+        var get = await _client.GetAsync($"/api/frag/{created.Id}");
         Assert.Equal(HttpStatusCode.OK, get.StatusCode);
     }
 }
