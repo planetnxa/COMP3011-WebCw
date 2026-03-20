@@ -19,7 +19,6 @@ builder.Services.AddOpenApi();
 // Enable Razor Pages for frontend views
 builder.Services.AddRazorPages();
 
-
 // Register services for dependency injection
 builder.Services.AddScoped<UserProfileController>();
 
@@ -28,7 +27,7 @@ string baseAddress = builder.Configuration["ApiBaseAddress"];
 builder.Services.AddHttpClient("ApiClient", client =>
 {
     client.BaseAddress = new Uri(baseAddress);
-    client.Timeout = TimeSpan.FromSeconds(10);
+    client.Timeout = TimeSpan.FromSeconds(30);
 });
 
 // Add session support
@@ -48,31 +47,20 @@ builder.Services.AddSwaggerGen(c =>
         Description = "An ASP.NET Core Web API for managing fragrances and user profiles."
     });
 
-    // to add context to our web api
     var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
     var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
     c.IncludeXmlComments(xmlPath);
-} );
-
-// something something dependency injections
-
-// Add services to the container.
-
-builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+});
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
-    //and use swashbuckly nd ting
     app.UseSwaggerUI(options =>
     {
         options.SwaggerEndpoint("/openapi/v1.json", "D'Arome API v1");
-    }); // baby what does this do????
+    });
 }
 
 app.UseHttpsRedirection();
@@ -83,10 +71,8 @@ app.UseSession();
 
 app.UseAuthorization();
 
-app.MapControllerRoute(name:"default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+app.MapControllers();
 
-// Map Razor Pages for frontend
 app.MapRazorPages();
 
 app.Run();

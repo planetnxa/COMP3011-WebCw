@@ -82,13 +82,26 @@ namespace WebAppComp3011.Controllers
         }
 
         /// <summary>
+        ///  Return fragrances by name (case-insensitive, partial match)
+        /// </summary>
+        // GET: api/Frag/name/{name}
+        [HttpGet("name/{name}")]
+        public async Task<ActionResult<IEnumerable<Fragrance>>> GetByName(string name)
+        {
+            var sql = "SELECT * FROM perfumeData WHERE Perfume LIKE @name LIMIT 50";
+            var parameters = new Dictionary<string, object> { { "@name", $"%{name}%" } };
+            var results = await GetFragranceBase(sql, parameters);
+            return results.Count == 0 ? NotFound() : results;
+        }
+
+        /// <summary>
         ///  Return fragrances by brand (case-insensitive, partial match)
         /// </summary>
         // GET: api/Frag/brand
         [HttpGet("brand/{brandName}")]
         public async Task<ActionResult<IEnumerable<Fragrance>>> GetByBrand(string brandName)
         {
-            var sql = "SELECT * FROM perfumeData WHERE Brand LIKE @brand";
+            var sql = "SELECT * FROM perfumeData WHERE Brand LIKE @brand LIMIT 50";
             var parameters = new Dictionary<string, object> { { "@brand", $"%{brandName}%" } };
             var results = await GetFragranceBase(sql, parameters);
             return results.Count == 0 ? NotFound() : results;
@@ -102,7 +115,7 @@ namespace WebAppComp3011.Controllers
         [HttpGet("accord/{accord}")]
         public async Task<ActionResult<IEnumerable<Fragrance>>> GetByAccord(string accord)
         {
-            var sql = "SELECT * FROM perfumeData WHERE Accords LIKE @accord";
+            var sql = "SELECT * FROM perfumeData WHERE Accords LIKE @accord LIMIT 50";
             var parameters = new Dictionary<string, object> { { "@accord", $"%{accord}%" } };
             var results = await GetFragranceBase(sql, parameters);
             return results.Count == 0 ? NotFound() : results;
@@ -121,6 +134,7 @@ namespace WebAppComp3011.Controllers
         FROM perfumeData p
         JOIN PerfumeNotes n ON p.perfumeId = n.PerfumeId
         WHERE n.Note LIKE @note
+        LIMIT 50
     ";
             var parameters = new Dictionary<string, object> { { "@note", $"%{note}%" } };
             var results = await GetFragranceBase(sql, parameters);
