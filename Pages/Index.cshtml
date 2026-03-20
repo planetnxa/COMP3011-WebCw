@@ -4,7 +4,6 @@
     ViewData["Title"] = "Home";
 }
 
-<div class="bg-landing">
 @if (Model.IsLoggedIn)
 {
     <div class="container mt-5">
@@ -47,19 +46,18 @@
 }
 else
 {
-    <div class="landing-hero fade-in-up"></div>
-    <div class="container mt-4">
+    <div class="container mt-5">
         <div class="row justify-content-center">
-            <div class="col-md-8">
-                <div class="landing-cta text-center fade-in-up" style="animation-delay: 0.2s;">
-                    <h1 class="display-3 fw-bold">Chez D'Arome</h1>
-                    <p class="text-white-50 mb-4">Your personal scent space.</p>
+            <div class="col-md-8 text-center">
+                <h1 class="display-3 fw-bold fade-in-up">Chez D'Arome</h1>
+                <p class="lead text-muted mb-4">Your personal scent space.</p>
+                <hr />
+                <div class="mt-4 p-5">
                     <a asp-page="/Login" class="btn btn-primary btn-lg me-2">Log In</a>
-                    <a asp-page="/Register" class="btn btn-outline-light btn-lg">Create an Account</a>
+                    <a asp-page="/Register" class="btn btn-outline-secondary btn-lg">Create an Account</a>
                 </div>
             </div>
         </div>
     </div>
 }
-</div>
 

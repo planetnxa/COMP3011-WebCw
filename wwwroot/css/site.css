@@ -178,7 +178,7 @@ a:not(.btn):not(.nav-link):not(.navbar-brand):focus {
 }
 
 /* ── Danger / Remove button ── */
-.btn-danger {
+/*.btn-danger {
     background-color: #9D1729;
     border-color: #9D1729;
     color: #fff;
@@ -191,6 +191,5 @@ a:not(.btn):not(.nav-link):not(.navbar-brand):focus {
     background-color: #7a1220;
     border-color: #7a1220;
     color: #fff;
-}
-
+}*/
 
