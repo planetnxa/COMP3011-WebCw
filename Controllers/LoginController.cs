@@ -18,13 +18,14 @@ namespace WebAppComp3011.Controllers
         }
 
         // GET: Login/Index - Display login form
+        [HttpGet]
         public IActionResult Index()
         {
             return View("Login");
         }
 
         // POST: Login/Login - Handle login attempt
-        [HttpPost("Login/Login")]
+        [HttpPost]
         public async Task<IActionResult> Login(string username, string password)
         {
             if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
@@ -35,10 +36,7 @@ namespace WebAppComp3011.Controllers
 
             try
             {
-                // Get HttpClient instance from factory
                 var httpClient = _httpClientFactory.CreateClient("ApiClient");
-
-                // Call API to get user by username
                 var response = await httpClient.GetAsync($"/api/userProfile/username/{username}");
 
                 if (response.StatusCode == System.Net.HttpStatusCode.OK)
@@ -47,22 +45,18 @@ namespace WebAppComp3011.Controllers
                     var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
                     var user = JsonSerializer.Deserialize<UserProfile>(content, options);
 
-                    // Verify password against stored hash
                     if (user != null && PasswordHashingService.VerifyPassword(password, user.Password))
                     {
-                        // Login successful - set session
                         HttpContext.Session.SetString("UserId", user.Id.ToString());
                         HttpContext.Session.SetString("Username", user.Username);
                         _logger.LogInformation($"User {username} logged in successfully.");
 
-                        // If this is the user's first login, redirect to setup to collect preferences
                         if (user.FirstLogin)
                         {
-                            _logger.LogInformation($"User {username} is on first login - redirecting to Setup.");
-                            return RedirectToAction("Index", "Setup");
+                            _logger.LogInformation($"User {username} is on first login - redirecting to Recommend.");
+                            return RedirectToAction("Index", "Recommend");
                         }
 
-                        // Otherwise send them to the main fragrances page
                         return RedirectToAction("Index", "Fragrances");
                     }
                     else
@@ -92,16 +86,14 @@ namespace WebAppComp3011.Controllers
         }
 
         // GET: Login/Register - Display registration form
-        [HttpGet("Login/Register")]
+        [HttpGet]
         public IActionResult Register()
         {
             return View("Register");
         }
 
-
-
         // POST: Login/Register - Handle account creation
-        [HttpPost("Login/Register")]
+        [HttpPost]
         public async Task<IActionResult> Register(string username, string password, string confirmPassword, string name)
         {
             if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password) || string.IsNullOrWhiteSpace(name))
@@ -124,10 +116,7 @@ namespace WebAppComp3011.Controllers
 
             try
             {
-                // Get HttpClient instance from factory
                 var httpClient = _httpClientFactory.CreateClient("ApiClient");
-
-                // Check if username already exists
                 var checkResponse = await httpClient.GetAsync($"/api/userProfile/username/{username}");
 
                 if (checkResponse.StatusCode == System.Net.HttpStatusCode.OK)
@@ -136,11 +125,10 @@ namespace WebAppComp3011.Controllers
                     return View("Register");
                 }
 
-                // Create new user account via API
                 var newProfile = new UserProfile
                 {
                     Username = username,
-                    Password = password, // Send plain password, hash in service
+                    Password = password,
                     Name = name,
                     FirstLogin = true
                 };
@@ -156,15 +144,12 @@ namespace WebAppComp3011.Controllers
                     var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
                     var createdUser = JsonSerializer.Deserialize<UserProfile>(responseContent, options);
 
-                    // Registration successful - auto-login the user
                     if (createdUser != null)
                     {
                         HttpContext.Session.SetString("UserId", createdUser.Id.ToString());
                         HttpContext.Session.SetString("Username", createdUser.Username);
                         _logger.LogInformation($"New user {username} registered and logged in.");
-
-                        // Redirect to the Setup controller's Index action so the user completes initial setup
-                        return RedirectToAction("Index", "Setup");
+                        return RedirectToAction("Index", "Recommend");
                     }
                 }
                 else if (createResponse.StatusCode == System.Net.HttpStatusCode.BadRequest)
@@ -190,7 +175,7 @@ namespace WebAppComp3011.Controllers
         }
 
         // GET: Login/Logout - Handle logout
-        [HttpGet("Login/Logout")]
+        [HttpGet]
         public IActionResult Logout()
         {
             HttpContext.Session.Clear();

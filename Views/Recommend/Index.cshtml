@@ -1,0 +1,63 @@
+@model List<WebAppComp3011.Models.Fragrance>
+
+@{
+    ViewData["Title"] = "Recommended For You";
+    Layout = "_Layout";
+}
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-10 offset-md-1">
+            <h1>Recommended For You</h1>
+            <p class="lead">Here are 3 fragrances picked just for you. Add them to your cabinet or refresh for new picks!</p>
+
+            <div class="d-flex gap-2 mb-4">
+                <a href="/Recommend" class="btn btn-primary">Refresh Recommendations</a>
+                <a href="/Cabinet" class="btn btn-outline-secondary">View My Cabinet</a>
+            </div>
+
+            @if (Model == null || Model.Count == 0)
+            {
+                <div class="alert alert-info">No recommendations available right now. Try refreshing.</div>
+            }
+            else
+            {
+                <div class="row">
+                    @foreach (var frag in Model)
+                    {
+                        <div class="col-md-4 mb-4">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title">@frag.FragName</h5>
+                                    <p class="card-text">
+                                        <strong>Brand:</strong> @frag.Brand<br />
+                                        <strong>Gender:</strong> @frag.Gender<br />
+                                        @if (frag.Rating > 0)
+                                        {
+                                            <strong>Rating:</strong> @frag.Rating.ToString("0.0") @: / 10<br />
+                                        }
+                                        @if (!string.IsNullOrEmpty(frag.Year))
+                                        {
+                                            <strong>Year:</strong> @frag.Year<br />
+                                        }
+                                        @if (frag.Accords != null && frag.Accords.Any())
+                                        {
+                                            <strong>Accords:</strong> @string.Join(", ", frag.Accords)<br />
+                                        }
+                                    </p>
+                                </div>
+                                <div class="card-footer">
+                                    <form method="post" asp-action="AddToCabinet" asp-controller="Recommend">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="perfumeId" value="@frag.Id" />
+                                        <button type="submit" class="btn btn-success w-100">Add to Cabinet</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>

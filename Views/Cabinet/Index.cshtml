@@ -1,0 +1,62 @@
+@model List<(WebAppComp3011.Models.UserCabinet Entry, WebAppComp3011.Models.Fragrance Fragrance)>
+
+@{
+    ViewData["Title"] = "My Cabinet";
+    Layout = "_Layout";
+}
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-10 offset-md-1">
+            <h1>My Cabinet</h1>
+            <p class="lead">Your personal fragrance collection.</p>
+
+            <div class="mb-4">
+                <a href="/Recommend" class="btn btn-primary">Get Recommendations</a>
+            </div>
+
+            @if (Model == null || Model.Count == 0)
+            {
+                <div class="alert alert-info">Your cabinet is empty. Head to <a href="/Recommend">Recommendations</a> to discover fragrances!</div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Name</th>
+                                <th>Brand</th>
+                                <th>Gender</th>
+                                <th>Rating</th>
+                                <th>Year</th>
+                                <th>Accords</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var (entry, frag) in Model)
+                            {
+                                <tr>
+                                    <td>@frag.FragName</td>
+                                    <td>@frag.Brand</td>
+                                    <td>@frag.Gender</td>
+                                    <td>@(frag.Rating > 0 ? frag.Rating.ToString("0.0") : "—")</td>
+                                    <td>@(string.IsNullOrEmpty(frag.Year) ? "—" : frag.Year)</td>
+                                    <td>@(frag.Accords != null && frag.Accords.Any() ? string.Join(", ", frag.Accords) : "—")</td>
+                                    <td>
+                                        <form method="post" asp-action="Remove" asp-controller="Cabinet">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="cabinetId" value="@entry.Id" />
+                                            <button type="submit" class="btn btn-sm btn-danger">Remove</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>
