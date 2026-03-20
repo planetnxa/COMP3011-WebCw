@@ -139,7 +139,13 @@ namespace WebAppComp3011.Services
                     SELECT last_insert_rowid();";
 
                 cmd.Parameters.AddWithValue("@username", profile.Username ?? string.Empty);
-                cmd.Parameters.AddWithValue("@password", profile.Password ?? string.Empty);
+                // Hash password before storing if it's not already hashed (check length > 20 suggests it's hashed)
+                string passwordToStore = profile.Password;
+                if (passwordToStore != null && passwordToStore.Length < 20)
+                {
+                    passwordToStore = PasswordHashingService.HashPassword(passwordToStore);
+                }
+                cmd.Parameters.AddWithValue("@password", passwordToStore ?? string.Empty);
                 cmd.Parameters.AddWithValue("@name", profile.Name ?? string.Empty);
                 cmd.Parameters.AddWithValue("@firstLogin", profile.FirstLogin ? 1 : 0);
 
@@ -175,7 +181,13 @@ namespace WebAppComp3011.Services
                     WHERE id = @id";
 
                 cmd.Parameters.AddWithValue("@username", profile.Username ?? string.Empty);
-                cmd.Parameters.AddWithValue("@password", profile.Password ?? string.Empty);
+                // Hash password before storing if it's not already hashed (check length > 20 suggests it's hashed)
+                string passwordToStore = profile.Password;
+                if (passwordToStore != null && passwordToStore.Length < 20)
+                {
+                    passwordToStore = PasswordHashingService.HashPassword(passwordToStore);
+                }
+                cmd.Parameters.AddWithValue("@password", passwordToStore ?? string.Empty);
                 cmd.Parameters.AddWithValue("@name", profile.Name ?? string.Empty);
                 cmd.Parameters.AddWithValue("@firstLogin", profile.FirstLogin ? 1 : 0);
                 cmd.Parameters.AddWithValue("@id", id);

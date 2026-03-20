@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using WebAppComp3011.Models;
+using WebAppComp3011.Services;
 using System.Text;
 using System.Text.Json;
 
@@ -46,8 +47,8 @@ namespace WebAppComp3011.Controllers
                     var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
                     var user = JsonSerializer.Deserialize<UserProfile>(content, options);
 
-                    // Validate password
-                    if (user != null && user.Password == password)
+                    // Verify password against stored hash
+                    if (user != null && PasswordHashingService.VerifyPassword(password, user.Password))
                     {
                         // Login successful - set session
                         HttpContext.Session.SetString("UserId", user.Id.ToString());
@@ -129,7 +130,7 @@ namespace WebAppComp3011.Controllers
                 var newProfile = new UserProfile
                 {
                     Username = username,
-                    Password = password,
+                    Password = password, // Send plain password, hash in service
                     Name = name,
                     FirstLogin = true
                 };
