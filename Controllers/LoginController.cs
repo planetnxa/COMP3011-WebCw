@@ -55,7 +55,15 @@ namespace WebAppComp3011.Controllers
                         HttpContext.Session.SetString("Username", user.Username);
                         _logger.LogInformation($"User {username} logged in successfully.");
 
-                        return RedirectToPage("/Index");
+                        // If this is the user's first login, redirect to setup to collect preferences
+                        if (user.FirstLogin)
+                        {
+                            _logger.LogInformation($"User {username} is on first login - redirecting to Setup.");
+                            return RedirectToAction("Index", "Setup");
+                        }
+
+                        // Otherwise send them to the main fragrances page
+                        return RedirectToAction("Index", "Fragrances");
                     }
                     else
                     {
@@ -155,7 +163,8 @@ namespace WebAppComp3011.Controllers
                         HttpContext.Session.SetString("Username", createdUser.Username);
                         _logger.LogInformation($"New user {username} registered and logged in.");
 
-                        return View("/Setup");
+                        // Redirect to the Setup controller's Index action so the user completes initial setup
+                        return RedirectToAction("Index", "Setup");
                     }
                 }
                 else if (createResponse.StatusCode == System.Net.HttpStatusCode.BadRequest)
