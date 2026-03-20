@@ -16,6 +16,12 @@ The raw OpenAPI specification can be found at:
 https://localhost:7227/openapi/v1.json
 ```
 
+## Production
+The application is also fully deployed with Azure at:
+```
+https://cwdeploy01.azurewebsites.net/
+```
+
 ## Features
 
 ### Fragrance Search & Discovery
