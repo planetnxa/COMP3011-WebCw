@@ -1,6 +1,6 @@
 body {
     background-color: #fff8ea;
-    font-family: 'Segoe UI', Arial, sans-serif;
+    font-family: Inter, Arial, sans-serif;
 }
 
 .card {
@@ -9,5 +9,11 @@ body {
 }
 
 .btn {
-    border-radius: 4px;
+    border-radius: 14px;
+}
+
+h1{
+    font-family: 'Gelasio';
+    font-style: italic;
+    font-weight:bolder;
 }

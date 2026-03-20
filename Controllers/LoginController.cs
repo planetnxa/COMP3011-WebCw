@@ -39,7 +39,7 @@ namespace WebAppComp3011.Controllers
                 var httpClient = _httpClientFactory.CreateClient("ApiClient");
 
                 // Call API to get user by username
-                var response = await httpClient.GetAsync($"api/userprofile/username/{username}");
+                var response = await httpClient.GetAsync($"/api/userProfile/username/{username}");
 
                 if (response.StatusCode == System.Net.HttpStatusCode.OK)
                 {
@@ -90,6 +90,8 @@ namespace WebAppComp3011.Controllers
             return View("Register");
         }
 
+
+
         // POST: Login/Register - Handle account creation
         [HttpPost("Login/Register")]
         public async Task<IActionResult> Register(string username, string password, string confirmPassword, string name)
@@ -118,7 +120,7 @@ namespace WebAppComp3011.Controllers
                 var httpClient = _httpClientFactory.CreateClient("ApiClient");
 
                 // Check if username already exists
-                var checkResponse = await httpClient.GetAsync($"api/userprofile/username/{username}");
+                var checkResponse = await httpClient.GetAsync($"/api/userProfile/username/{username}");
 
                 if (checkResponse.StatusCode == System.Net.HttpStatusCode.OK)
                 {
@@ -138,7 +140,7 @@ namespace WebAppComp3011.Controllers
                 var json = JsonSerializer.Serialize(newProfile);
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-                var createResponse = await httpClient.PostAsync("api/userprofile", content);
+                var createResponse = await httpClient.PostAsync("/api/userProfile", content);
 
                 if (createResponse.StatusCode == System.Net.HttpStatusCode.Created)
                 {
@@ -153,7 +155,7 @@ namespace WebAppComp3011.Controllers
                         HttpContext.Session.SetString("Username", createdUser.Username);
                         _logger.LogInformation($"New user {username} registered and logged in.");
 
-                        return RedirectToPage("/Index");
+                        return View("/Setup");
                     }
                 }
                 else if (createResponse.StatusCode == System.Net.HttpStatusCode.BadRequest)
