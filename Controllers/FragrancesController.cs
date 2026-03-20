@@ -20,7 +20,7 @@ namespace WebAppComp3011.Controllers
             try
             {
                 var httpClient = _httpClientFactory.CreateClient("ApiClient");
-                var response = await httpClient.GetAsync("api/fragrances");
+                var response = await httpClient.GetAsync("api/frag");
 
                 if (response.StatusCode == System.Net.HttpStatusCode.OK)
                 {

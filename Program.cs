@@ -21,10 +21,10 @@ builder.Services.AddRazorPages();
 
 
 // Register services for dependency injection
-builder.Services.AddScoped<UserProfileService>();
+builder.Services.AddScoped<UserProfileController>();
 
 // Register HttpClient with base address for API calls
-string baseAddress = builder.Configuration["ApiBaseAddress"] ?? "http://localhost:5000";
+string baseAddress = builder.Configuration["ApiBaseAddress"];
 builder.Services.AddHttpClient("ApiClient", client =>
 {
     client.BaseAddress = new Uri(baseAddress);
