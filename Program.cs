@@ -54,7 +54,7 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
 {
     app.MapOpenApi();
     app.UseSwaggerUI(options =>
@@ -76,5 +76,3 @@ app.MapControllers();
 app.MapRazorPages();
 
 app.Run();
-
-public partial class Program { }
