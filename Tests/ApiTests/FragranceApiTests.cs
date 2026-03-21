@@ -4,16 +4,19 @@ using System.Text;
 using System.Text.Json;
 using WebAppComp3011.Models;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Tests.ApiTests;
 
 public class FragranceApiTests : IClassFixture<TestWebApplicationFactory>
 {
     private readonly HttpClient _client;
+    private readonly ITestOutputHelper _output;
 
-    public FragranceApiTests(TestWebApplicationFactory factory)
+    public FragranceApiTests(TestWebApplicationFactory factory, ITestOutputHelper output)
     {
         _client = factory.CreateClient();
+        _output = output;
     }
 
     [Fact]
@@ -22,6 +25,7 @@ public class FragranceApiTests : IClassFixture<TestWebApplicationFactory>
         var res = await _client.GetAsync("/api/frag/9999");
 
         Assert.Equal(HttpStatusCode.NotFound, res.StatusCode);
+        _output.WriteLine("PASS: GET /api/frag/9999 returned 404 NotFound as expected.");
     }
 
     [Fact]
@@ -30,12 +34,15 @@ public class FragranceApiTests : IClassFixture<TestWebApplicationFactory>
         var newFrag = new Fragrance { FragName = "Test", Brand = "X" };
         var post = await _client.PostAsJsonAsync("/api/frag", newFrag);
         Assert.Equal(HttpStatusCode.Created, post.StatusCode);
+        _output.WriteLine("PASS: POST /api/frag returned 201 Created.");
 
         var created = await post.Content.ReadFromJsonAsync<Fragrance>();
         Assert.NotNull(created);
+        _output.WriteLine($"PASS: Deserialized fragrance with Id={created.Id}.");
 
         var get = await _client.GetAsync($"/api/frag/{created.Id}");
         Assert.Equal(HttpStatusCode.OK, get.StatusCode);
+        _output.WriteLine($"PASS: GET /api/frag/{created.Id} returned 200 OK.");
     }
 
     [Fact]
@@ -63,6 +70,7 @@ public class FragranceApiTests : IClassFixture<TestWebApplicationFactory>
         Assert.Equal("Male", created.Gender);
         Assert.Equal(4.5f, created.Rating);
         Assert.Equal("2015", created.Year);
+        _output.WriteLine($"PASS: All fields match for created fragrance (Id={created.Id}, Name=Sauvage, Brand=Dior).");
     }
 
     [Fact]
@@ -75,6 +83,7 @@ public class FragranceApiTests : IClassFixture<TestWebApplicationFactory>
         var created = await post.Content.ReadFromJsonAsync<Fragrance>();
         Assert.NotNull(created);
         Assert.True(created.Id > 0);
+        _output.WriteLine($"PASS: Fragrance with empty fields created successfully (Id={created.Id}).");
     }
 
     [Fact]
@@ -84,6 +93,7 @@ public class FragranceApiTests : IClassFixture<TestWebApplicationFactory>
         // (other tests may have inserted rows, but this validates the endpoint works)
         var res = await _client.GetAsync("/api/frag");
         Assert.True(res.StatusCode == HttpStatusCode.OK || res.StatusCode == HttpStatusCode.NotFound);
+        _output.WriteLine($"PASS: GET /api/frag returned {(int)res.StatusCode} {res.StatusCode} (OK or NotFound accepted).");
     }
 
     [Fact]
@@ -96,10 +106,12 @@ public class FragranceApiTests : IClassFixture<TestWebApplicationFactory>
 
         var del = await _client.DeleteAsync($"/api/frag/{created.Id}");
         Assert.Equal(HttpStatusCode.NoContent, del.StatusCode);
+        _output.WriteLine($"PASS: DELETE /api/frag/{created.Id} returned 204 NoContent.");
 
         // Confirm it's gone
         var get = await _client.GetAsync($"/api/frag/{created.Id}");
         Assert.Equal(HttpStatusCode.NotFound, get.StatusCode);
+        _output.WriteLine("PASS: GET after delete returned 404 NotFound — fragrance is gone.");
     }
 
     [Fact]
@@ -107,6 +119,7 @@ public class FragranceApiTests : IClassFixture<TestWebApplicationFactory>
     {
         var res = await _client.DeleteAsync("/api/frag/99999");
         Assert.Equal(HttpStatusCode.NotFound, res.StatusCode);
+        _output.WriteLine("PASS: DELETE /api/frag/99999 returned 404 NotFound as expected.");
     }
 
     [Fact]
@@ -121,6 +134,7 @@ public class FragranceApiTests : IClassFixture<TestWebApplicationFactory>
         created.Brand = "NewBrand";
         var put = await _client.PutAsJsonAsync($"/api/frag/{created.Id}", created);
         Assert.Equal(HttpStatusCode.NoContent, put.StatusCode);
+        _output.WriteLine($"PASS: PUT /api/frag/{created.Id} returned 204 NoContent.");
 
         // Verify the update
         var get = await _client.GetAsync($"/api/frag/{created.Id}");
@@ -129,6 +143,7 @@ public class FragranceApiTests : IClassFixture<TestWebApplicationFactory>
         Assert.NotNull(updated);
         Assert.Equal("Updated", updated.FragName);
         Assert.Equal("NewBrand", updated.Brand);
+        _output.WriteLine("PASS: Verified update — Name='Updated', Brand='NewBrand'.");
     }
 
     [Fact]
@@ -137,6 +152,7 @@ public class FragranceApiTests : IClassFixture<TestWebApplicationFactory>
         var frag = new Fragrance { Id = 1, FragName = "Test", Brand = "X" };
         var put = await _client.PutAsJsonAsync("/api/frag/999", frag);
         Assert.Equal(HttpStatusCode.BadRequest, put.StatusCode);
+        _output.WriteLine("PASS: PUT with mismatched Id returned 400 BadRequest.");
     }
 
     [Fact]
@@ -145,6 +161,7 @@ public class FragranceApiTests : IClassFixture<TestWebApplicationFactory>
         var frag = new Fragrance { Id = 88888, FragName = "Ghost", Brand = "None" };
         var put = await _client.PutAsJsonAsync("/api/frag/88888", frag);
         Assert.Equal(HttpStatusCode.NotFound, put.StatusCode);
+        _output.WriteLine("PASS: PUT on non-existent fragrance returned 404 NotFound.");
     }
 
     [Fact]
@@ -155,6 +172,7 @@ public class FragranceApiTests : IClassFixture<TestWebApplicationFactory>
 
         var res = await _client.GetAsync("/api/frag/name/BleuDe");
         Assert.Equal(HttpStatusCode.OK, res.StatusCode);
+        _output.WriteLine("PASS: Search by name 'BleuDe' returned 200 OK with match.");
     }
 
     [Fact]
@@ -162,6 +180,7 @@ public class FragranceApiTests : IClassFixture<TestWebApplicationFactory>
     {
         var res = await _client.GetAsync("/api/frag/name/zzzzNonExistent9999");
         Assert.Equal(HttpStatusCode.NotFound, res.StatusCode);
+        _output.WriteLine("PASS: Search by name with no match returned 404 NotFound.");
     }
 
     [Fact]
@@ -172,6 +191,7 @@ public class FragranceApiTests : IClassFixture<TestWebApplicationFactory>
 
         var res = await _client.GetAsync("/api/frag/brand/UniqueBrandXYZ");
         Assert.Equal(HttpStatusCode.OK, res.StatusCode);
+        _output.WriteLine("PASS: Search by brand 'UniqueBrandXYZ' returned 200 OK.");
     }
 
     [Fact]
@@ -179,6 +199,7 @@ public class FragranceApiTests : IClassFixture<TestWebApplicationFactory>
     {
         var res = await _client.GetAsync("/api/frag/brand/NoSuchBrand99999");
         Assert.Equal(HttpStatusCode.NotFound, res.StatusCode);
+        _output.WriteLine("PASS: Search by brand with no match returned 404 NotFound.");
     }
 
     [Fact]
@@ -186,5 +207,6 @@ public class FragranceApiTests : IClassFixture<TestWebApplicationFactory>
     {
         var res = await _client.GetAsync("/api/frag/notanumber");
         Assert.Equal(HttpStatusCode.NotFound, res.StatusCode);
+        _output.WriteLine("PASS: GET with invalid route returned 404 NotFound.");
     }
 }
